@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sophic AI Teacher App</title>
+    <style>
+        /* Overall Body */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Frosted Glass Effect */
+        .frosted {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Main container */
+        #grade-selection {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* Grade Selection Section */
+        #grade-selection {
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        label, select, button {
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        select {
+            background-color: #333;
+            border: none;
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #f44336; /* Red button */
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:disabled {
+            background-color: #888;
+        }
+
+        /* Ensure touchscreen design */
+        @media (max-width: 768px) {
+            #grade-selection {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="grade-selection" class="frosted">
+        <label for="grade">Select Grade:</label>
+        <select id="grade">
+            <option value="">Select Grade</option>
+            <option value="6">Grade 6</option>
+            <option value="7">Grade 7</option>
+            <option value="8">Grade 8</option>
+            <option value="9">Grade 9</option>
+            <option value="10">Grade 10</option>
+        </select>
+
+        <label for="subject">Select Subject:</label>
+        <select id="subject" disabled>
+            <option value="">Select Subject</option>
+        </select>
+
+        <label for="book">Select Book (Only for English):</label>
+        <select id="book" disabled>
+            <option value="">Select Book</option>
+        </select>
+
+        <label for="chapter">Select Chapter:</label>
+        <select id="chapter" disabled>
+            <option value="">Select Chapter</option>
+        </select>
+
+        <button id="askButton" disabled>Start Chat</button>
+    </div>
+
+    <script>
+        // Curriculum Data
+        const curriculum = {
+            "6": {
+                "english": {"Poorvi": 5},
+                "math": 10,
+                "science": 12,
+                "sst": 14
+            },
+            "7": {
+                "english": {"An Alien Hand": 7, "Honeycomb": 10},
+                "math": 13,
+                "science": 13,
+                "civics": 8,
+                "history": 8,
+                "geography": 7
+            },
+            "8": {
+                "english": {"Honeydew": 8, "It so happened": 8},
+                "math": 13,
+                "science": 13,
+                "civics": 8,
+                "history": 8,
+                "geography": 5
+            },
+            "9": {
+                "english": {"Beehive": 9, "Moments": 9},
+                "math": 12,
+                "science": 12,
+                "civics": 5,
+                "history": 5,
+                "geography": 6,
+                "economics": 4
+            },
+            "10": {
+                "english": {"First Flight": 9, "Footprints without feet": 10},
+                "math": 15,
+                "science": 13,
+                "civics": 8,
+                "geography": 7,
+                "economics": 5,
+                "history": 5
+            }
+        };
+
+        // DOM Elements
+        const gradeSelect = document.getElementById('grade');
+        const subjectSelect = document.getElementById('subject');
+        const bookSelect = document.getElementById('book');
+        const chapterSelect = document.getElementById('chapter');
+        const askButton = document.getElementById('askButton');
+
+        // Update subject options based on selected grade
+        gradeSelect.addEventListener('change', function () {
+            const grade = gradeSelect.value;
+            subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+            bookSelect.innerHTML = '<option value="">Select Book</option>';
+            chapterSelect.innerHTML = '<option value="">Select Chapter</option>';
+            bookSelect.disabled = true;
+            chapterSelect.disabled = true;
+            askButton.disabled = true;
+
+            if (grade) {
+                Object.keys(curriculum[grade]).forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject;
+                    option.textContent = subject.charAt(0).toUpperCase() + subject.slice(1);
+                    subjectSelect.appendChild(option);
+                });
+                subjectSelect.disabled = false;
+            }
+        });
+
+        // Update book options based on selected subject
+        subjectSelect.addEventListener('change', function () {
+            const grade = gradeSelect.value;
+            const subject = subjectSelect.value;
+            bookSelect.innerHTML = '<option value="">Select Book</option>';
+            chapterSelect.innerHTML = '<option value="">Select Chapter</option>';
+            chapterSelect.disabled = true;
+            askButton.disabled = true;
+
+            if (subject === 'english') {
+                Object.keys(curriculum[grade][subject]).forEach(book => {
+                    const option = document.createElement('option');
+                    option.value = book;
+                    option.textContent = book;
+                    bookSelect.appendChild(option);
+                });
+                bookSelect.disabled = false;
+            } else {
+                populateChapters(grade, subject);
+            }
+        });
+
+        // Update chapter options based on selected book
+        bookSelect.addEventListener('change', function () {
+            const grade = gradeSelect.value;
+            const subject = subjectSelect.value;
+            const book = bookSelect.value;
+            populateChapters(grade, subject, book);
+        });
+
+        // Populate chapters for the selected subject and book
+        function populateChapters(grade, subject, book = null) {
+            chapterSelect.innerHTML = '<option value="">Select Chapter</option>';
+            chapterSelect.disabled = true;
+
+            if (subject === 'english' && book) {
+                const numChapters = curriculum[grade][subject][book];
+                for (let i = 1; i <= numChapters; i++) {
+                    const option = document.createElement('option');
+                    option.value = `Chapter ${i}`;
+                    option.textContent = `Chapter ${i}`;
+                    chapterSelect.appendChild(option);
+                }
+                chapterSelect.disabled = false;
+            } else if (curriculum[grade][subject]) {
+                const numChapters = curriculum[grade][subject];
+                for (let i = 1; i <= numChapters; i++) {
+                    const option = document.createElement('option');
+                    option.value = `Chapter ${i}`;
+                    option.textContent = `Chapter ${i}`;
+                    chapterSelect.appendChild(option);
+                }
+                chapterSelect.disabled = false;
+            }
+        }
+
+        // Enable the "Start Chat" button if all selections are made
+        chapterSelect.addEventListener('change', function () {
+            askButton.disabled = !(gradeSelect.value && subjectSelect.value && chapterSelect.value);
+        });
+
+        // Handle the "Start Chat" button click
+        askButton.addEventListener('click', function () {
+            window.location.href = 'Sophic Chat.html'; // Redirect to the chat page
+        });
+    </script>
+</body>
+</html>

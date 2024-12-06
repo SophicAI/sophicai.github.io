@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sophic AI Teacher</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(45deg, #000000, #4d0000);
+            background-size: 400% 400%;
+            animation: gradientMove 10s infinite;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        /* Moving Background Animation */
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Frosted Glass Border Effect */
+        .frosted-border {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border: 10px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Content Wrapper */
+        .content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        /* Logo Animation */
+        .logo-container img {
+            width: 100px;
+            height: auto;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-out forwards, breathe 3s ease-in-out 1s infinite alternate;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes breathe {
+            0% {
+                transform: scale(1);
+            }
+            100% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* App Name */
+        .app-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-out 0.5s forwards;
+        }
+
+        /* Button Styles */
+        .start-btn {
+            margin-top: 30px;
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 30px;
+            background: rgba(255, 0, 0, 0.7);
+            color: white;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .start-btn:hover {
+            background: rgba(255, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+
+        /* Button Reveal */
+        .start-btn.show {
+            display: inline-block;
+            animation: fadeIn 1s ease-out 3s forwards;
+        }
+
+        /* Button Animation */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="frosted-border">
+        <div class="content">
+            <!-- Logo -->
+            <div class="logo-container">
+                <img src="logo.png" alt="Sophic Logo"> <!-- Replace with your actual logo -->
+            </div>
+            <!-- App Name -->
+            <div class="app-name">Sophic AI Teacher</div>
+            <!-- Button -->
+            <button class="start-btn" onclick="window.location.href='choose.html'">Start Learning</button>
+        </div>
+    </div>
+
+    <script>
+        // Ensure the "Start Learning" button shows up after animations
+        setTimeout(() => {
+            document.querySelector('.start-btn').classList.add('show');
+        }, 3000); // 3-second delay
+    </script>
+</body>
+</html>
