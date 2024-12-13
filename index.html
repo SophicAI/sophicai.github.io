@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sophic - AI Teaching App</title>
+    <link rel="icon" type="image/x-icon" href="https://u.cubeupload.com/Grishiv/Logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         /* General Reset */
@@ -15,7 +16,7 @@
         }
         body {
             overflow-x: hidden;
-            background: linear-gradient(135deg, #000428, #004e92);
+            background: linear-gradient(135deg, #2d0066, #660099);
             background-size: 300% 300%;
             animation: bgAnimation 15s infinite;
             color: #fff;
@@ -41,8 +42,15 @@
         nav h1 {
             font-size: 2rem;
             font-weight: bold;
-            color: #fff;
-            transition: transform 0.2s ease;
+            color: #ff1744;
+            text-shadow: 0 0 15px #ff1744;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        nav h1 img {
+            width: 40px;
+            height: 40px;
         }
         nav h1:hover {
             transform: scale(1.1);
@@ -55,7 +63,7 @@
             transition: color 0.3s ease, transform 0.2s ease;
         }
         nav a:hover {
-            color: #00bcd4;
+            color: #ff1744;
             transform: scale(1.1);
         }
         .hero {
@@ -75,10 +83,11 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 15px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, border 0.3s ease;
         }
         .hero .glass:hover {
             transform: scale(1.02);
+            border: 1px solid #ff1744;
         }
         .hero h1 {
             font-size: 4rem;
@@ -104,7 +113,7 @@
             transition: background 0.3s ease, transform 0.2s ease;
         }
         .hero button:hover {
-            background: #0288d1;
+            background: #ff1744;
             transform: scale(1.1);
         }
         .features {
@@ -132,11 +141,13 @@
             max-width: 380px;
             text-align: center;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            transition: transform 0.2s ease, box-shadow 0.3s ease, border 0.3s ease;
+            border: 1px solid transparent;
         }
         .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 8px 30px rgba(0, 188, 212, 0.8);
+            transform: translateY(-10px) rotate(5deg);
+            box-shadow: 0 8px 30px rgba(255, 23, 68, 0.8);
+            border: 1px solid #ff1744;
         }
         .feature-card img {
             width: 80px;
@@ -144,12 +155,13 @@
             transition: transform 0.2s ease;
         }
         .feature-card img:hover {
-            transform: scale(1.1);
+            transform: rotate(360deg) scale(1.1);
         }
         .feature-card h3 {
             font-size: 1.8rem;
             margin-bottom: 10px;
             color: #fff;
+            text-shadow: 0 0 10px #ff1744;
         }
         .feature-card p {
             color: #ccc;
@@ -170,7 +182,7 @@
 <body>
     <!-- Navigation -->
     <nav>
-        <h1>Sophic</h1>
+        <h1><img src="https://u.cubeupload.com/Grishiv/Logo.png" alt="Sophic Logo">Sophic</h1>
         <div>
             <a href="#features">Features</a>
             <a href="#contact">Contact</a>
@@ -193,63 +205,53 @@
     <section id="features" class="features">
         <h2 class="features-title">Features</h2>
         <div class="features-grid">
-            <!-- Feature 1 -->
             <div class="feature-card">
-                <img src="https://via.placeholder.com/80" alt="Interactive Learning">
+                <img src="https://u.cubeupload.com/Grishiv/icons8touchscreen94.png" alt="Interactive Learning">
                 <h3>Interactive Learning</h3>
                 <p>Engage with quizzes, animations, and visual aids designed for NCERT students.</p>
             </div>
-            <!-- Feature 2 -->
             <div class="feature-card">
-                <img src="https://via.placeholder.com/80" alt="AI Tutor">
+                <img src="https://u.cubeupload.com/Grishiv/icons8teacher94.png" alt="AI Tutor">
                 <h3>AI Tutor</h3>
                 <p>Sophic adapts to your learning style, providing tailored explanations.</p>
             </div>
-            <!-- Feature 3 -->
             <div class="feature-card">
-                <img src="https://via.placeholder.com/80" alt="Progress Tracking">
+                <img src="https://u.cubeupload.com/Grishiv/icons8progress94.png" alt="Progress Tracking">
                 <h3>Progress Tracking</h3>
                 <p>Monitor your journey with detailed analytics and progress reports.</p>
             </div>
-            <!-- Feature 4 -->
             <div class="feature-card">
-                <img src="https://via.placeholder.com/80" alt="Collaborative Learning">
+                <img src="https://u.cubeupload.com/Grishiv/icons8team94.png" alt="Collaborative Learning">
                 <h3>Collaborative Learning</h3>
                 <p>Learn with peers using shared study plans and group discussions.</p>
             </div>
-            <!-- Feature 5 -->
             <div class="feature-card">
-                <img src="https://via.placeholder.com/80" alt="Custom Tests">
+                <img src="https://u.cubeupload.com/Grishiv/icons8test94.png" alt="Custom Tests">
                 <h3>Custom Tests</h3>
                 <p>Create personalized tests tailored to your syllabus.</p>
             </div>
-            <!-- Feature 6 -->
             <div class="feature-card">
-                <img src="https://via.placeholder.com/80" alt="Multimedia Lessons">
+                <img src="https://u.cubeupload.com/Grishiv/icons8circledplay94.png" alt="Multimedia Lessons">
                 <h3>Multimedia Lessons</h3>
                 <p>Explore lessons enriched with videos, images, and infographics.</p>
             </div>
-            <!-- Feature 7 -->
             <div class="feature-card">
-                <img src="https://via.placeholder.com/80" alt="Adaptive Learning">
+                <img src="https://u.cubeupload.com/Grishiv/icons8change69.png" alt="Adaptive Learning">
                 <h3>Adaptive Learning</h3>
                 <p>Sophic adjusts to your strengths and weaknesses automatically.</p>
             </div>
-            <!-- Feature 8 -->
             <div class="feature-card">
-                <img src="https://via.placeholder.com/80" alt="Offline Access">
+                <img src="https://u.cubeupload.com/Grishiv/icons8offline94.png" alt="Offline Access">
                 <h3>Offline Access</h3>
                 <p>Download lessons and learn without internet connectivity.</p>
             </div>
-            <!-- Feature 9 -->
             <div class="feature-card">
-                <img src="https://via.placeholder.com/80" alt="Parental Insights">
+                <img src="https://u.cubeupload.com/Grishiv/icons8team941.png" alt="Parental Insights">
                 <h3>Parental Insights</h3>
                 <p>Parents can track their child’s learning progress in real time.</p>
             </div>
-            <!-- Feature 10 -->
             <div class="feature-card">
-                <img src="https://via.placeholder.com/80" alt="Gamified Learning">
+                <img src="https://u.cubeupload.com/Grishiv/icons8game94.png" alt="Gamified Learning">
                 <h3>Gamified Learning</h3>
                 <p>Learn while playing with fun challenges and achievements.</p>
             </div>
