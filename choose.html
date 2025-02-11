@@ -7,7 +7,7 @@
     <style>
         /* Overall Body */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #121212;
             color: #fff;
             margin: 0;
@@ -20,11 +20,11 @@
 
         /* Frosted Glass Effect */
         .frosted {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 20px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
         }
 
         /* Main container */
@@ -42,26 +42,38 @@
         }
 
         label, select, button {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             padding: 10px;
             font-size: 16px;
+            border-radius: 10px;
         }
 
+        /* Select Styles */
         select {
             background-color: #333;
             border: none;
             color: white;
             border-radius: 10px;
-            margin-bottom: 10px;
+            font-size: 16px;
+            padding: 10px;
         }
 
+        /* Button Styles */
         button {
-            background-color: #f44336; /* Red button */
+            background-color: #008CBA; /* Light Blue */
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 30px;
             cursor: pointer;
             font-size: 16px;
+            padding: 14px 35px;
+            transition: all 0.3s ease;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover {
+            background-color: #ff7043; /* Orange */
+            transform: scale(1.05);
         }
 
         button:disabled {
@@ -73,6 +85,41 @@
             #grade-selection {
                 width: 90%;
             }
+        }
+
+        /* Animation for smooth fade-in */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Applying animation to form elements */
+        label, select, button {
+            opacity: 0;
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        /* Adding slight delay to make the UI feel fluid */
+        label:nth-child(1) {
+            animation-delay: 0.3s;
+        }
+        select:nth-child(2) {
+            animation-delay: 0.6s;
+        }
+        select:nth-child(3) {
+            animation-delay: 0.9s;
+        }
+        select:nth-child(4) {
+            animation-delay: 1.2s;
+        }
+        button {
+            animation-delay: 1.5s;
         }
     </style>
 </head>
