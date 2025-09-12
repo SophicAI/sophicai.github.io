@@ -2,1109 +2,415 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sophic AI - Your Personal Tutor</title>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sophic — Ask. Learn. Done.</title>
+  <meta name="description" content="Sophic is a free AI teacher for NCERT. Cinematic glassmorphism with liquid-glass animation and smooth micro-interactions." />
+
+  <!-- THEME TOKENS AND BASE -->
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    :root {
-      --bg: radial-gradient(ellipse at top, #0a0f1c 0%, #050812 40%, #020408 100%);
-      --glass: rgba(15, 20, 35, 0.6);
-      --glass-strong: rgba(20, 25, 40, 0.8);
-      --glass-light: rgba(255, 255, 255, 0.05);
-      --glass-hover: rgba(255, 255, 255, 0.08);
-      --text: #f0f4ff;
-      --text-dim: #9ca8c4;
-      --text-muted: #6b7785;
-      --accent: #22e57a;
-      --accent-dim: #1bb566;
-      --accent-glow: rgba(34, 229, 122, 0.3);
-      --border: rgba(255, 255, 255, 0.08);
-      --border-strong: rgba(255, 255, 255, 0.15);
-      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-      --shadow-strong: 0 16px 64px rgba(0, 0, 0, 0.6);
-      --user-bg: linear-gradient(135deg, rgba(34, 229, 122, 0.15), rgba(0, 200, 255, 0.1));
-      --bot-bg: linear-gradient(135deg, rgba(15, 20, 35, 0.9), rgba(25, 30, 45, 0.8));
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root{
+      --bg-1:#080a0f; --bg-2:#0d1321; --acc-1:#6ea8ff; --acc-2:#9b8cff;
+      --txt:#f6f7fb; --txt-dim:#b9bfd1; --glass:rgba(255,255,255,0.06);
+      --glass-brd:rgba(255,255,255,0.18); --blur:24px;
 
-    html, body { 
-      height: 100%; 
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      overflow: hidden;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      /* Fluid spacing scale */
+      --space-1: clamp(8px, 1.2vw, 14px);
+      --space-2: clamp(12px, 1.8vw, 20px);
+      --space-3: clamp(18px, 2.6vw, 28px);
+      --space-4: clamp(26px, 4vw, 44px);
+      --section-pad: clamp(40px, 10vw, 120px);
+      --radius: 18px;
     }
-    /* ENHANCED LIQUID BACKGROUND */
-    #liquid-stage { 
-      position: fixed; 
-      inset: 0; 
-      z-index: -2; 
-      overflow: hidden;
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      /* Calm, readable background */
+      background:
+        radial-gradient(1000px 700px at 50% 5%, rgba(110,168,255,.06), transparent 60%),
+        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      color: var(--txt);
+      overflow-x:hidden;
     }
 
-    #liquid-canvas { 
-      width: 100vw; 
-      height: 100vh; 
-      filter: blur(60px) saturate(150%) contrast(120%); 
-      opacity: 0.9;
-      animation: canvasPulse 8s ease-in-out infinite;
-    }
-    @keyframes canvasPulse {
-      0%, 100% { opacity: 0.9; }
-      50% { opacity: 1; }
-    }
-    /* FLOATING PARTICLES */
-    #particles { 
-      position: fixed; 
-      inset: 0; 
-      z-index: -1; 
-      pointer-events: none; 
+    /* HERO BACKDROP (kept) */
+    #gl { position: fixed; inset: 0; width:100%; height:100%; z-index:-2; display:block }
+    .fx-overlay{
+      pointer-events:none; position:fixed; inset:0; z-index:-1;
+      background: radial-gradient(1200px 800px at 50% 20%, rgba(110,168,255,.12), transparent 60%),
+                  radial-gradient(900px 700px at 80% 90%, rgba(155,140,255,.12), transparent 60%),
+                  radial-gradient(70% 120% at 50% 120%, rgba(0,0,0,.35), transparent 60%);
+      filter:saturate(105%);
     }
 
-    .particle { 
-      position: absolute; 
-      width: 3px; 
-      height: 3px; 
-      border-radius: 50%; 
-      background: var(--accent);
-      box-shadow: 0 0 12px var(--accent-glow);
-      animation: float 25s linear infinite;
+    /* NAV */
+    .nav{
+      position:fixed; top:0; left:0; right:0; z-index:10; backdrop-filter: blur(16px);
+      background: linear-gradient(180deg, rgba(10,12,18,.6), rgba(10,12,18,.2));
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .nav-inner{max-width:1120px; margin:0 auto; padding:14px 20px; display:flex; align-items:center; justify-content:space-between}
+    .logo{font-weight:900; letter-spacing:.4px; font-size:1.15rem; background:linear-gradient(90deg, var(--acc-1), var(--acc-2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+    .nav a{color:var(--txt-dim); text-decoration:none; margin-left:20px; font-weight:600; font-size:.95rem; opacity:.9}
+    .nav a:hover{color:var(--txt)}
+
+    /* HERO (unchanged) */
+    .hero{min-height:100svh; display:grid; place-items:center; padding:120px 16px 64px}
+    .hero-inner{max-width:980px; width:100%; display:grid; gap:28px; text-align:center}
+    .kicker{display:inline-flex; align-items:center; gap:8px; margin:0 auto; padding:6px 12px; border-radius:999px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--glass-brd); backdrop-filter: blur(10px); color:var(--txt-dim); font-weight:700; letter-spacing:.2px; font-size:.85rem;
+      box-shadow: inset 0 0 0 0.5px rgba(255,255,255,.25), 0 10px 30px rgba(110,168,255,.08);
+    }
+    .k-dot{width:8px; height:8px; border-radius:50%; background: radial-gradient(circle at 30% 30%, var(--acc-1), var(--acc-2)); box-shadow:0 0 20px rgba(110,168,255,.7)}
+    .title{font-size: clamp(2rem, 6vw, 4.25rem); font-weight:900; line-height:1.05; letter-spacing:-.02em; margin:0 auto; max-width:900px; text-wrap:balance}
+    .title .accent{background:linear-gradient(90deg, var(--acc-1), var(--acc-2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+    .sub{margin:6px auto 0; max-width:760px; color:var(--txt-dim); font-size: clamp(1rem, 2.4vw, 1.25rem)}
+    .glass{
+      margin: 20px auto 0; width:min(820px, 92vw); padding:18px; border-radius:20px; position:relative;
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+      border:1px solid var(--glass-brd); backdrop-filter: blur(var(--blur));
+      box-shadow: 0 40px 120px rgba(110,168,255,.12), inset 0 1px 0 rgba(255,255,255,.25);
+      transition: transform .6s cubic-bezier(.2,.8,.2,1), box-shadow .6s, background .6s;
+    }
+    .glass::before{content:""; position:absolute; inset:-1px; border-radius:inherit; pointer-events:none;
+      background: radial-gradient(1200px 600px at var(--mx,50%) calc(var(--my,50%) - 20%), rgba(110,168,255,.15), transparent 60%),
+                  radial-gradient(600px 400px at calc(var(--mx,50%) + 10%) calc(var(--my,50%) + 10%), rgba(155,140,255,.14), transparent 60%);
+      mix-blend-mode: screen; filter: blur(10px); opacity:.75; transition:opacity .4s ease
+    }
+    .input-row{display:flex; align-items:center; gap:12px}
+    .input{flex:1; font:600 1.05rem/1.2 Inter, system-ui; color:var(--txt);
+      background: transparent; border:none; outline:none; padding:16px 18px; border-radius:14px; backdrop-filter: blur(2px);
+    }
+    .input::placeholder{color:#9aa3b8}
+    .send{
+      height:56px; min-width:56px; border-radius:16px; border:1px solid var(--glass-brd);
+      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)); color:var(--txt);
+      display:grid; place-items:center; cursor:pointer; transition: transform .18s ease, box-shadow .18s ease;
+      box-shadow: 0 10px 30px rgba(110,168,255,.12);
+    }
+    .send:hover{transform: translateY(-2px); box-shadow: 0 16px 40px rgba(110,168,255,.18)}
+    .send svg{display:block}
+    .hint{margin:10px auto 0; max-width:760px; color:#8e98af; font-size:.9rem}
+    .chips{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px}
+    .chip{padding:6px 10px; border-radius:999px; border:1px solid var(--glass-brd); color:#cbd3e6;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04)); font-weight:700; font-size:.8rem; letter-spacing:.2px}
+
+    /* ACCESSIBLE HOME BUTTON */
+    .back-home{
+      position: fixed; bottom: 18px; left: 18px; z-index: 30;
+      padding: 10px 14px; font-weight: 800; border-radius: 12px;
+      color:#0b1020; background:#f6f7fb; border:1px solid rgba(255,255,255,.22);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35); text-decoration:none;
+    }
+    .back-home:focus-visible{ outline: 3px solid #6ea8ff; outline-offset: 3px }
+
+    /* CONTENT SECTIONS */
+    .section{ max-width:1120px; margin:0 auto; padding: var(--section-pad) 16px; position:relative }
+    .section + .section{ margin-top: var(--space-4) }
+
+    /* Readable frosted cards */
+    .card{
+      background: rgba(10,14,22,.76);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: var(--radius); color:#f6f7fb;
+      padding: clamp(18px, 3.6vw, 28px);
+      backdrop-filter: blur(12px) brightness(1.05) saturate(115%);
+      box-shadow: 0 24px 72px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.18);
+    }
+    @supports not (backdrop-filter: blur(2px)) { .card{ background: rgba(10,14,22,.9) } }
+
+    .section h2{ font-size: clamp(1.8rem, 4.2vw, 2.4rem); margin: 0 0 var(--space-1); letter-spacing:-.01em }
+    .lead{ color: var(--txt-dim); margin: 0 0 var(--space-2); font-size: clamp(1rem,2vw,1.1rem) }
+
+    .grid-3{ display:grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
+    .grid-2{ display:grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-2); }
+    .pill{ display:inline-block; padding:8px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); font-weight:700; font-size:.85rem; color:#dfe6fb }
+
+    .subjects{ display:flex; flex-wrap:wrap; gap:10px; margin-top:8px }
+    .subjects .chip{ padding:10px 14px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.06); font-weight:700; color:#e8edff }
+
+    @media (max-width: 900px){
+      .grid-3{ grid-template-columns: 1fr }
+      .grid-2{ grid-template-columns: 1fr }
     }
 
-    @keyframes float { 
-      0% { transform: translateY(110vh) translateX(0) rotate(0deg); opacity: 0; } 
-      10% { opacity: 1; }
-      50% { transform: translateY(50vh) translateX(20px) rotate(180deg); }
-      90% { opacity: 1; }
-      100% { transform: translateY(-10vh) translateX(-20px) rotate(360deg); opacity: 0; } 
-    }
-    /* MAIN LAYOUT - FIXED GRID */
-    .app { 
-      display: grid; 
-      grid-template-columns: 300px 1fr; 
-      height: 100vh; 
-      gap: 0;
-      position: fixed;
-      inset: 0;
-    }
-    /* ENHANCED SIDEBAR */
-    .sidebar {
-      background: var(--glass-strong);
-      backdrop-filter: blur(40px) saturate(180%);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      animation: slideInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-      position: relative;
-      overflow: hidden;
-    }
-    .sidebar::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-      animation: shimmer 3s infinite;
-    }
-    @keyframes shimmer {
-      0% { transform: translateX(-100%); opacity: 0; }
-      50% { opacity: 1; }
-      100% { transform: translateX(100%); opacity: 0; }
-    }
-    .sidebar-header {
-      padding: 24px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--glass-light);
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 600;
-      font-size: 1.2rem;
-    }
-    .logo-dot {
-      width: 10px;
-      height: 10px;
-      background: var(--accent);
-      border-radius: 50%;
-      box-shadow: 0 0 20px var(--accent-glow);
-      animation: pulse 2s infinite ease-in-out;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.2); opacity: 0.8; }
-    }
-    .new-chat {
-      width: 36px;
-      height: 36px;
-      background: var(--glass-light);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      font-size: 18px;
-      font-weight: 600;
+    /* ================== SCROLL‑DRIVEN ANIMATIONS (CSS View/Scroll Timelines) ================== */
+    /* Motion tokens */
+    @keyframes rise { from { opacity:0; transform: translateY(22px) } to { opacity:1; transform:none } }
+    @keyframes maskSweep { from { clip-path: inset(0 52% 0 52%) } to { clip-path: inset(0 0 0 0) } }
+    @keyframes tilt3d {
+      from { transform: perspective(900px) rotateX(6deg) rotateY(-6deg) translateY(16px); opacity:.85 }
+      to   { transform: perspective(900px) rotateX(0) rotateY(0); opacity:1 }
     }
 
-    .new-chat:hover {
-      background: var(--accent);
-      color: #000;
-      transform: scale(1.1) rotate(90deg);
-      box-shadow: 0 8px 25px var(--accent-glow);
-    }
-    .sessions {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .sessions::-webkit-scrollbar { width: 4px; }
-    .sessions::-webkit-scrollbar-track { background: transparent; }
-    .sessions::-webkit-scrollbar-thumb { 
-      background: var(--border); 
-      border-radius: 2px; 
-    }
-    .session {
-      padding: 16px;
-      border-radius: 14px;
-      cursor: pointer;
-      background: transparent;
-      border: 1px solid transparent;
-      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      position: relative;
-      overflow: hidden;
-      transform-style: preserve-3d;
-    }
-    .session::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--glass-light);
-      border-radius: inherit;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    .session:hover::before {
-      opacity: 1;
-    }
-    .session:hover {
-      border-color: var(--border);
-      transform: translateX(6px);
-      box-shadow: var(--shadow);
-    }
-    .session.active {
-      background: rgba(34, 229, 122, 0.1);
-      border-color: var(--accent-glow);
-      transform: translateX(8px);
-    }
-    .session.active::before {
-      opacity: 0.5;
-    }
-    .session-title {
-      font-weight: 500;
-      font-size: 0.95rem;
-      margin-bottom: 6px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      position: relative;
-      z-index: 1;
-    }
-    .session-preview {
-      font-size: 0.8rem;
-      color: var(--text-dim);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      position: relative;
-      z-index: 1;
-    }
-    /* ENHANCED MAIN PANEL - FIXED LAYOUT */
-    .main {
-      display: flex;
-      flex-direction: column;
-      background: var(--glass);
-      backdrop-filter: blur(30px) saturate(180%);
-      animation: slideInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-      position: relative;
-      overflow: hidden;
-      height: 100vh;
-    }
-    .main::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-      animation: shimmer 4s infinite reverse;
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 24px 32px;
-      border-bottom: 1px solid var(--border);
-      background: var(--glass-strong);
-      backdrop-filter: blur(20px);
-      flex-shrink: 0;
-    }
-    .title { 
-      font-weight: 600; 
-      font-size: 1.2rem; 
-      background: linear-gradient(135deg, var(--text), var(--accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .status { 
-      display: flex; 
-      align-items: center; 
-      gap: 10px; 
-      color: var(--text-dim); 
-      font-size: 0.9rem; 
-    }
-    .status-dot { 
-      width: 8px; 
-      height: 8px; 
-      background: var(--accent); 
-      border-radius: 50%; 
-      box-shadow: 0 0 12px var(--accent-glow);
-      animation: pulse 2s infinite;
-    }
-    /* ENHANCED WELCOME STATE */
-    .welcome-state {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 48px;
-      text-align: center;
-      animation: fadeInScale 1s cubic-bezier(0.16, 1, 0.3, 1);
-      overflow-y: auto;
-    }
-    @keyframes fadeInScale {
-      0% { opacity: 0; transform: scale(0.9) translateY(20px); }
-      100% { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    .welcome-state h1 {
-      font-size: 3rem;
-      font-weight: 300;
-      margin-bottom: 20px;
-      background: linear-gradient(135deg, var(--text), var(--accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: textShine 3s ease-in-out infinite;
-    }
-    @keyframes textShine {
-      0%, 100% { filter: brightness(1); }
-      50% { filter: brightness(1.2); }
-    }
-    .welcome-state p {
-      color: var(--text-dim);
-      font-size: 1.15rem;
-      margin-bottom: 48px;
-      max-width: 600px;
-      line-height: 1.7;
-      animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
-    }
-    @keyframes slideUp {
-      0% { opacity: 0; transform: translateY(30px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    .starter-cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-bottom: 48px;
-      max-width: 700px;
-      animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
-    }
-    .card {
-      padding: 28px 24px;
-      background: var(--glass-strong);
-      backdrop-filter: blur(25px);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-      transform-style: preserve-3d;
-    }
-    .card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent 50%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    .card:hover::before {
-      opacity: 1;
-    }
-    .card:hover {
-      background: rgba(34, 229, 122, 0.1);
-      border-color: var(--accent-glow);
-      transform: translateY(-8px);
-      box-shadow: var(--shadow-strong);
-    }
-    .card-icon {
-      width: 48px;
-      height: 48px;
-      background: var(--accent);
-      border-radius: 14px;
-      margin: 0 auto 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      color: #000;
-      transition: all 0.3s ease;
-    }
-    .card:hover .card-icon {
-      transform: scale(1.1) rotate(5deg);
-      box-shadow: 0 8px 25px var(--accent-glow);
-    }
-    .card h3 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-    .card p {
-      font-size: 0.9rem;
-      color: var(--text-dim);
-      line-height: 1.5;
-    }
-    .tab-bar {
-      display: flex;
-      gap: 6px;
-      padding: 8px;
-      background: var(--glass-light);
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
-    }
-    .tab {
-      padding: 12px 20px;
-      background: transparent;
-      border: none;
-      border-radius: 12px;
-      color: var(--text-dim);
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      font-size: 0.9rem;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .tab.active {
-      background: var(--accent);
-      color: #000;
-      transform: scale(1.05);
-      box-shadow: 0 4px 15px var(--accent-glow);
-    }
-    .tab:hover:not(.active) {
-      background: var(--glass-hover);
-      color: var(--text);
-      transform: translateY(-2px);
-    }
-    /* ENHANCED CHAT STATE - FIXED LAYOUT */
-    .chat-state {
-      flex: 1;
-      display: none;
-      flex-direction: column;
-      animation: fadeIn 0.6s ease;
-      min-height: 0; /* KEY FIX: Allow flexbox to shrink */
-      overflow: hidden;
-    }
-    .chat-state.active {
-      display: flex;
-    }
-    @keyframes fadeIn {
-      0% { opacity: 0; }
-      100% { opacity: 1; }
-    }
-    /* FIXED MESSAGES CONTAINER */
-    .messages {
-      flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding: 32px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      position: relative;
-      min-height: 0; /* KEY FIX: Allow container to shrink */
-    }
-    .messages::before,
-    .messages::after {
-      content: '';
-      position: sticky;
-      left: 0;
-      right: 0;
-      height: 24px;
-      pointer-events: none;
-      z-index: 1;
-      display: block;
-      flex-shrink: 0;
-    }
-    .messages::before { 
-      top: 0; 
-      background: linear-gradient(to bottom, rgba(0,0,0,0.3), transparent); 
-    }
-    .messages::after { 
-      bottom: 0; 
-      background: linear-gradient(to top, rgba(0,0,0,0.3), transparent); 
-    }
-    .messages::-webkit-scrollbar { width: 6px; }
-    .messages::-webkit-scrollbar-track { background: transparent; }
-    .messages::-webkit-scrollbar-thumb { 
-      background: var(--border); 
-      border-radius: 3px; 
-    }
-    .msg {
-      max-width: 75%;
-      padding: 20px 24px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      backdrop-filter: blur(20px);
-      position: relative;
-      transform-style: preserve-3d;
-      transition: all 0.3s ease;
-      animation: messageSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-      line-height: 1.6;
-      flex-shrink: 0; /* Prevent messages from shrinking */
-    }
-    @keyframes messageSlideIn { 
-      0% { 
-        opacity: 0; 
-        transform: translateY(30px) scale(0.95); 
-      } 
-      60% {
-        opacity: 1;
-        transform: translateY(0) scale(1.02);
-      }
-      100% { 
-        transform: scale(1); 
-      } 
-    }
-    .msg::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent 50%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    .msg:hover::before {
-      opacity: 1;
-    }
-    .msg:hover {
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-      transform: translateY(-2px);
-    }
-    .user {
-      align-self: flex-end;
-      background: var(--user-bg);
-      border-color: var(--accent-glow);
-    }
-    .bot {
-      align-self: flex-start;
-      background: var(--bot-bg);
-    }
-    /* ENHANCED SUGGESTIONS */
-    .suggestions {
-      padding: 0 32px 20px;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      animation: slideUp 0.5s ease;
-      flex-shrink: 0;
-    }
-    .suggestion {
-      padding: 10px 18px;
-      background: var(--glass-light);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      color: var(--text-dim);
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      backdrop-filter: blur(15px);
-      white-space: nowrap;
-    }
-    .suggestion:hover {
-      background: var(--accent);
-      color: #000;
-      transform: translateY(-3px) scale(1.05);
-      box-shadow: 0 8px 25px var(--accent-glow);
-    }
-    /* FIXED INPUT - ALWAYS VISIBLE AND POSITIONED */
-    .input {
-      padding: 24px 32px;
-      border-top: 1px solid var(--border);
-      background: var(--glass-strong);
-      backdrop-filter: blur(30px);
-      flex-shrink: 0 !important;
-      position: sticky;
-      bottom: 0;
-      z-index: 10;
-    }
-    .input-bar {
-      display: flex;
-      gap: 16px;
-      align-items: flex-end;
-      background: var(--glass);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 16px 20px;
-      box-shadow: var(--shadow);
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      min-height: 60px;
-    }
-    .input-bar::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(45deg, transparent, rgba(34, 229, 122, 0.05), transparent);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    .input-bar:focus-within {
-      border-color: var(--accent-glow);
-      box-shadow: 0 0 0 3px rgba(34, 229, 122, 0.2), var(--shadow-strong);
-      transform: scale(1.01);
-    }
-    .input-bar:focus-within::before {
-      opacity: 1;
-    }
-    #userInput {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: var(--text);
-      font: inherit;
-      line-height: 1.6;
-      min-height: 28px;
-      max-height: 120px;
-      overflow-y: auto;
-      resize: none;
-      position: relative;
-      z-index: 1;
-    }
-    #userInput::placeholder { 
-      color: var(--text-muted); 
-    }
-    #sendButton {
-      width: 44px;
-      height: 44px;
-      border: none;
-      border-radius: 14px;
-      background: var(--accent);
-      color: #000;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 6px 20px var(--accent-glow);
-      font-size: 18px;
-      flex-shrink: 0;
-    }
-    #sendButton:hover {
-      transform: translateY(-3px) scale(1.05);
-      box-shadow: 0 12px 30px var(--accent-glow);
-    }
-    #sendButton:active {
-      transform: translateY(-1px) scale(0.98);
-    }
-    #sendButton:disabled {
-      background: rgba(255, 255, 255, 0.1);
-      color: var(--text-muted);
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-    /* ENHANCED TYPING INDICATOR */
-    .typing {
-      display: inline-flex;
-      gap: 10px;
-      align-items: center;
-      padding: 16px 20px;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      background: var(--bot-bg);
-      align-self: flex-start;
-      animation: messageSlideIn 0.4s ease;
-      flex-shrink: 0;
-    }
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      animation: typingBounce 1.4s infinite ease-in-out;
-    }
-    .dot:nth-child(2) { animation-delay: 0.2s; }
-    .dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes typingBounce {
-      0%, 60%, 100% {
-        transform: translateY(0);
-        opacity: 0.5;
-      }
-      30% {
-        transform: translateY(-12px);
-        opacity: 1;
-      }
-    }
-    /* ENHANCED ANIMATIONS */
-    @keyframes slideInLeft {
-      0% { transform: translateX(-100%); opacity: 0; }
-      100% { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideInRight {
-      0% { transform: translateX(100%); opacity: 0; }
-      100% { transform: translateX(0); opacity: 1; }
-    }
-    /* RESPONSIVE DESIGN */
-    @media (max-width: 768px) {
-      .app { 
-        grid-template-columns: 1fr; 
-        grid-template-rows: auto 1fr;
-      }
+    /* Base reveal utilities tied to view() timeline */
+    .reveal{ animation: rise linear both; animation-timeline: view(); animation-range: entry 12% cover 48% }
+    .reveal-title{ animation: maskSweep linear both; animation-timeline: view(); animation-range: entry 0% cover 35% }
+    .reveal-tilt{ animation: tilt3d ease-out both; animation-timeline: view(); animation-range: entry 12% cover 48% }
 
-      .sidebar { 
-        display: none; 
-      }
-
-      .starter-cards { 
-        grid-template-columns: 1fr; 
-        gap: 16px;
-      }
-
-      .msg { 
-        max-width: 90%; 
-      }
-      .welcome-state h1 {
-        font-size: 2.2rem;
-      }
-      .messages {
-        padding: 20px;
-      }
-      .input {
-        padding: 16px 20px;
-      }
+    /* Parallax via a single keyframe and depth variable */
+    @keyframes parallaxY {
+      from { transform: translateY(calc(var(--depth, 1) * 22px)) }
+      to   { transform: translateY(calc(var(--depth, 1) * -22px)) }
     }
-    @media (max-width: 480px) {
-      .welcome-state {
-        padding: 32px 20px;
-      }
-      .welcome-state h1 {
-        font-size: 1.8rem;
-      }
-      .card {
-        padding: 20px 16px;
-      }
+    .parallax{
+      animation: parallaxY linear both;
+      animation-timeline: view();
+      animation-range: entry -10% cover 120%;
+      will-change: transform;
     }
+    .layer-bg   { --depth: .25 }
+    .layer-mid  { --depth: .5 }
+    .layer-fg   { --depth: 1 }
+
+    /* Named view timelines per tab to synchronize child animations */
+    .tab{ view-timeline: --tab block 10% 10% }
+    .tab .consume{ animation-timeline: --tab }
+
+    /* Decorative aura layers (simple shapes for depth, non‑intrusive) */
+    .aura{
+      position:absolute; inset:auto; pointer-events:none; filter: blur(40px) saturate(120%);
+      opacity:.45; border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(110,168,255,.55), rgba(155,140,255,.15) 60%, transparent 70%);
+    }
+    .aura.a{ width: 360px; height: 360px; top:-60px; left:-60px }
+    .aura.b{ width: 300px; height: 300px; bottom:-40px; right:-40px }
   </style>
 </head>
+
 <body>
-  <!-- Enhanced Liquid Background -->
-  <div id="liquid-stage">
-    <canvas id="liquid-canvas"></canvas>
-  </div>
-  <div id="particles"></div>
-  <div class="app">
-    <!-- Enhanced Sidebar -->
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <div class="logo">
-          <div class="logo-dot"></div>
-          Sophic
+  <!-- HERO BACKGROUND (kept) -->
+  <canvas id="gl" aria-hidden="true"></canvas>
+  <div class="fx-overlay" aria-hidden="true"></div>
+
+  <header class="nav" role="navigation" aria-label="Primary">
+    <div class="nav-inner">
+      <div class="logo" aria-label="Sophic">Sophic</div>
+      <nav>
+        <a href="#why">Why</a>
+        <a href="#how">How</a>
+        <a href="#subjects">Subjects</a>
+        <a href="#try">Try</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Back-to-front-page -->
+  <a class="back-home" href="/" aria-label="Back to front page">← Home</a>
+
+  <!-- HERO (unchanged content) -->
+  <main class="hero" id="top">
+    <div class="hero-inner">
+      <div class="kicker"><span class="k-dot"></span> Free AI Teacher for NCERT</div>
+      <h1 class="title">Ask. <span class="accent">Learn.</span> Done.</h1>
+      <p class="sub">The Coaching Alternative. Clear & Intuitive — CBSE Classes 6–10.</p>
+      <div class="glass" id="glass">
+        <div class="input-row">
+          <input id="q" class="input" autocomplete="off" placeholder="Try: Explain quadratic equations step-by-step" aria-label="Type your question"/>
+          <button class="send" id="send" aria-label="Ask Sophic">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M22 2L11 13"></path>
+              <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
+            </svg>
+          </button>
         </div>
-        <button class="new-chat" onclick="startNewChat()" title="New Chat">+</button>
-      </div>
-      <div class="sessions" id="sessionsList">
-        <!-- Sessions populated dynamically -->
+        <div class="chips" aria-hidden="true">
+          <div class="chip">NCERT-aligned</div>
+          <div class="chip">24/7</div>
+          <div class="chip">Free during beta</div>
+        </div>
+        <div class="hint" id="hint">Press Enter ↵ to ask • Try “Photosynthesis Class 10”</div>
       </div>
     </div>
-    <!-- Enhanced Main Panel -->
-    <div class="main">
-      <div class="header">
-        <div class="title" id="chatTitle">How can I help you learn today?</div>
-        <div class="status">
-          <div class="status-dot"></div>
-          Online
+  </main>
+
+  <!-- ================= TABS WITH VIEW‑TIMELINE ANIMATIONS AND PARALLAX ================= -->
+
+  <!-- WHY TAB -->
+  <section class="section tab" id="why">
+    <!-- subtle aura layers with parallax -->
+    <div class="aura a layer-bg parallax"></div>
+    <div class="aura b layer-mid parallax"></div>
+
+    <div class="card reveal-tilt consume">
+      <span class="pill">Why Sophic</span>
+      <h2 class="reveal-title consume">Clarity, speed, no fluff.</h2>
+      <p class="lead reveal consume">Focused NCERT help with step‑by‑step logic and worked examples — without 40‑minute detours. </p>
+
+      <div class="grid-3">
+        <div class="card reveal-tilt consume">
+          <h3 style="margin:0 0 var(--space-1)">Actually explains</h3>
+          <p class="lead" style="margin:0">Tight reasoning, labeled steps, and checks at each stage.</p>
         </div>
-      </div>
-      <!-- Enhanced Welcome State -->
-      <div class="welcome-state" id="welcomeState">
-        <h1>How can I help you learn today?</h1>
-        <p>Ask me anything about your studies. I'm your personal NCERT tutor, ready to provide detailed explanations, step-by-step solutions, and help you understand complex topics with ease.</p>
-        <div class="starter-cards">
-          <div class="card" onclick="askQuestion('Explain photosynthesis with examples and real-world applications')">
-            <div class="card-icon">🌱</div>
-            <h3>Science Help</h3>
-            <p>Clear explanations of scientific concepts with real-world examples</p>
-          </div>
-          <div class="card" onclick="askQuestion('Solve step by step: 2x² + 5x - 3 = 0')">
-            <div class="card-icon">📊</div>
-            <h3>Math Solutions</h3>
-            <p>Step-by-step problem solving with multiple approaches</p>
-          </div>
-          <div class="card" onclick="askQuestion('Explain the themes and literary devices in Romeo and Juliet')">
-            <div class="card-icon">📚</div>
-            <h3>Literature Analysis</h3>
-            <p>Deep analysis of texts, themes, and literary techniques</p>
-          </div>
+        <div class="card reveal-tilt consume">
+          <h3 style="margin:0 0 var(--space-1)">Ask precisely</h3>
+          <p class="lead" style="margin:0">Target any question or chapter; get the exact explanation needed.</p>
         </div>
-        <div class="tab-bar">
-                  </div>
-      </div>
-      <!-- Enhanced Chat State -->
-      <div class="chat-state" id="chatState">
-        <div class="messages" id="messages"></div>
-        <div class="suggestions" id="suggestions"></div>
-      </div>
-      <!-- FIXED Input - Always visible -->
-      <div class="input">
-        <form class="input-bar" id="chatForm">
-          <textarea id="userInput" placeholder="Ask me anything about your studies..." rows="1"></textarea>
-          <button type="submit" id="sendButton">↗</button>
-        </form>
+        <div class="card reveal-tilt consume">
+          <h3 style="margin:0 0 var(--space-1)">Iterate fast</h3>
+          <p class="lead" style="margin:0">Follow‑ups until it clicks — patient and available 24/7.</p>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
+
+  <!-- HOW TAB -->
+  <section class="section tab" id="how">
+    <div class="card reveal-tilt consume">
+      <span class="pill">How it works</span>
+      <h2 class="reveal-title consume">Three steps, every time.</h2>
+      <div class="grid-3">
+        <article class="card reveal-tilt consume">
+          <h3 style="margin:0 0 var(--space-1)">1) Ask</h3>
+          <p class="lead" style="margin:0">Type the exact NCERT question or paste a problem.</p>
+        </article>
+        <article class="card reveal-tilt consume">
+          <h3 style="margin:0 0 var(--space-1)">2) Learn</h3>
+          <p class="lead" style="margin:0">Get a clean walkthrough with examples and self‑checks.</p>
+        </article>
+        <article class="card reveal-tilt consume">
+          <h3 style="margin:0 0 var(--space-1)">3) Review</h3>
+          <p class="lead" style="margin:0">Refine with follow‑ups, summaries, or quick quizzes.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUBJECTS TAB -->
+  <section class="section tab" id="subjects">
+    <div class="card reveal-tilt consume">
+      <span class="pill">Subjects</span>
+      <h2 class="reveal-title consume">NCERT Classes 6–10.</h2>
+      <p class="lead reveal consume">All core subjects, aligned to chapters — ready when needed. </p>
+      <div class="subjects">
+        <span class="chip reveal layer-fg parallax consume">Mathematics</span>
+        <span class="chip reveal layer-mid parallax consume">Physics</span>
+        <span class="chip reveal layer-fg parallax consume">Chemistry</span>
+        <span class="chip reveal layer-mid parallax consume">Biology</span>
+        <span class="chip reveal layer-fg parallax consume">History</span>
+        <span class="chip reveal layer-mid parallax consume">Geography</span>
+        <span class="chip reveal layer-fg parallax consume">Economics</span>
+        <span class="chip reveal layer-mid parallax consume">Civics</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRY -->
+  <section class="section tab" id="try">
+    <div class="card reveal-tilt consume" style="text-align:center">
+      <h2 class="reveal-title consume">Try it now</h2>
+      <p class="lead reveal consume">Instant demo — no sign‑up. Type a question in the box above and hit the paper plane. </p>
+    </div>
+  </section>
+
+  <footer class="section" style="text-align:center; color:#95a0ba">© 2025 Sophic — Student‑first.</footer>
+
+  <!-- =================== SCRIPTS =================== -->
   <script>
-    // Global state
-    let currentSessionId = null;
-    let sessions = [];
-    // DOM references
-    const welcomeState = document.getElementById('welcomeState');
-    const chatState = document.getElementById('chatState');
-    const messages = document.getElementById('messages');
-    const userInput = document.getElementById('userInput');
-    const sendButton = document.getElementById('sendButton');
-    const chatForm = document.getElementById('chatForm');
-    const sessionsList = document.getElementById('sessionsList');
-    const chatTitle = document.getElementById('chatTitle');
-    const suggestions = document.getElementById('suggestions');
-    // Enhanced liquid background
-    (() => {
-      const canvas = document.getElementById('liquid-canvas');
-      const ctx = canvas.getContext('2d');
-      let animationId;
-      function resizeCanvas() {
-        canvas.width = window.innerWidth * window.devicePixelRatio;
-        canvas.height = window.innerHeight * window.devicePixelRatio;
-        canvas.style.width = window.innerWidth + 'px';
-        canvas.style.height = window.innerHeight + 'px';
-        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-      }
-      const orbs = Array.from({ length: 15 }, () => ({
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-        radius: Math.random() * 150 + 80,
-        vx: (Math.random() - 0.5) * 1.2,
-        vy: (Math.random() - 0.5) * 1.2,
-        hue: Math.random() * 80 + 100,
-        opacity: Math.random() * 0.4 + 0.2,
-        pulseSpeed: Math.random() * 0.02 + 0.01
-      }));
-      let time = 0;
-      function animate() {
-        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-        time += 0.016;
+    /* ====== Liquid Glass WebGL (hero) — original shader kept ====== */
+    const canvas = document.getElementById('gl');
+    const gl = canvas.getContext('webgl', {antialias:true, preserveDrawingBuffer:true});
+    let W=0,H=0, DPR=Math.min(2, window.devicePixelRatio||1);
+    const vert = `attribute vec2 p; void main(){ gl_Position = vec4(p,0.0,1.0); }`;
+    const frag = `precision highp float; uniform vec2 r; uniform float t; uniform vec2 m;
+float hash(vec2 p){return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453123);}
+float noi(vec2 p){ vec2 i=floor(p); vec2 f=fract(p);
+float a=hash(i); float b=hash(i+vec2(1.,0.)); float c=hash(i+vec2(0.,1.)); float d=hash(i+vec2(1.,1.));
+vec2 u = f*f*(3.-2.*f); return mix(a,b,u.x)+ (c-a)*u.y*(1.-u.x) + (d-b)*u.x*u.y; }
+float smin(float a, float b, float k){ float h=clamp(.5+.5*(b-a)/k,0.,1.); return mix(b,a,h)-k*h*(1.-h); }
+float field(vec2 uv){ float d=1.; for(int i=0;i<6;i++){ float fi=float(i);
+vec2 c = 0.35*vec2(sin(t*0.4+fi*1.7), cos(t*0.33+fi*1.2)); float rad = 0.22 + 0.06*sin(t*0.7+fi);
+float s = length(uv-c) - rad; d = smin(d, s, 0.18); } return d; }
+vec3 bg(vec2 uv){ uv = uv*0.5+0.5; vec3 c1 = vec3(0.03,0.05,0.10); vec3 c2 = vec3(0.06,0.08,0.16);
+vec3 g = mix(c1, c2, smoothstep(0.,1.,uv.y)); float b1 = smoothstep(0.35,0.0, length(uv-vec2(0.2,0.2)) );
+float b2 = smoothstep(0.5,0.0, length(uv-vec2(0.9,0.9)) ); vec3 a1 = vec3(0.38,0.66,1.0); vec3 a2 = vec3(0.61,0.55,1.0);
+g += b1*a1*0.25 + b2*a2*0.22; return g; }
+void main(){ vec2 uv = (gl_FragCoord.xy - 0.5*r)/r.y; vec2 par = (m - 0.5*r)/r.y * 0.08; uv += par;
+float d = field(uv); vec2 e = vec2(0.0015, 0); float dx = field(uv+e.xy)-field(uv-e.xy); float dy = field(uv+e.yx)-field(uv-e.yx);
+vec2 n = normalize(vec2(dx,dy)); vec2 offs = n * (0.06 + 0.04*noi(uv*4.0 + t*0.2));
+vec3 colR = bg(uv + offs*1.02); vec3 colG = bg(uv + offs*0.98); vec3 colB = bg(uv + offs*0.94);
+vec3 refr = vec3(colR.r, colG.g, colB.b); float glass = smoothstep(0.04, -0.02, d); float edge = smoothstep(0.08, 0.0, abs(d));
+vec3 tint = mix(vec3(1.), vec3(0.94,0.96,1.0), 0.45); vec3 col = mix(bg(uv), refr*tint + 0.05*edge, glass);
+float sweep = 0.0; sweep += 0.7*exp(-20.0*pow(abs(dot(n, normalize(vec2(0.7,0.6)))), 1.5)); sweep *= glass; col += sweep*vec3(0.8,0.9,1.0);
+float vig = smoothstep(1.2, 0.3, length(uv)); col *= vig; gl_FragColor = vec4(col, 1.0); }`;
+    function compile(type, src){ const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){ throw new Error(gl.getShaderInfoLog(s)); } return s; }
+    if(gl){
+      const prog = gl.createProgram();
+      gl.attachShader(prog, compile(gl.VERTEX_SHADER, vert));
+      gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, frag));
+      gl.linkProgram(prog);
+      gl.useProgram(prog);
+      const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1,  -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+      const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      const uR = gl.getUniformLocation(prog, 'r'); const uT = gl.getUniformLocation(prog, 't'); const uM = gl.getUniformLocation(prog, 'm');
+      function resize(){ const w = Math.floor(innerWidth * DPR), h = Math.floor(innerHeight * DPR);
+        canvas.width=w; canvas.height=h; canvas.style.width=innerWidth+'px'; canvas.style.height=innerHeight+'px'; gl.viewport(0,0,w,h); }
+      addEventListener('resize', resize, {passive:true}); resize();
+      let start = performance.now(), mx=innerWidth*DPR/2, my=innerHeight*DPR/2;
+      const glass = document.getElementById('glass');
+      addEventListener('pointermove', e=>{ mx=e.clientX*DPR; my=e.clientY*DPR; glass?.style.setProperty('--mx', e.clientX+'px'); glass?.style.setProperty('--my', e.clientY+'px'); }, {passive:true});
+      (function loop(){
+        const t = (performance.now()-start)/1000;
+        gl.uniform2f(uR, canvas.width, canvas.height); gl.uniform1f(uT, t); gl.uniform2f(uM, mx, my);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        requestAnimationFrame(loop);
+      })();
+    }
 
-        orbs.forEach((orb, i) => {
-          orb.x += orb.vx;
-          orb.y += orb.vy;
-          if (orb.x < -orb.radius || orb.x > window.innerWidth + orb.radius) orb.vx *= -1;
-          if (orb.y < -orb.radius || orb.y > window.innerHeight + orb.radius) orb.vy *= -1;
-          const pulse = Math.sin(time * orb.pulseSpeed) * 0.3 + 1;
-          const currentRadius = orb.radius * pulse;
-          const currentOpacity = orb.opacity * pulse;
-          const gradient = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, currentRadius);
-          gradient.addColorStop(0, `hsla(${orb.hue}, 90%, 70%, ${currentOpacity})`);
-          gradient.addColorStop(0.4, `hsla(${orb.hue}, 80%, 60%, ${currentOpacity * 0.6})`);
-          gradient.addColorStop(1, 'hsla(0, 0%, 0%, 0)');
-          ctx.fillStyle = gradient;
-          ctx.beginPath();
-          ctx.arc(orb.x, orb.y, currentRadius, 0, Math.PI * 2);
-          ctx.fill();
+    /* HERO INPUT */
+    const q = document.getElementById('q');
+    const send = document.getElementById('send');
+    const hint = document.getElementById('hint');
+    const suggestions = [
+      'Explain quadratic equations step-by-step',
+      'Photosynthesis for Class 10 (short)',
+      "Newton's Laws with examples",
+      'Chemical equations — balance this: Fe + O2 → Fe2O3'
+    ];
+    let si=0, ci=0, typing=true;
+    function typeLoop(){
+      const s = suggestions[si];
+      if(typing){ ci++; q.setAttribute('placeholder', s.slice(0,ci));
+        if(ci===s.length){ typing=false; setTimeout(typeLoop, 1200); return; }
+        setTimeout(typeLoop, 28);
+      } else { ci--; q.setAttribute('placeholder', s.slice(0,ci));
+        if(ci===0){ typing=true; si=(si+1)%suggestions.length; setTimeout(typeLoop, 260); return; }
+        setTimeout(typeLoop, 16);
+      }
+    }
+    typeLoop();
+    function rocket(btn){
+      btn.animate([
+        { transform:'translateY(0) scale(1)', filter:'drop-shadow(0 10px 20px rgba(110,168,255,.3))' },
+        { transform:'translateY(-6px) scale(1.02)' },
+        { transform:'translateY(0) scale(1)' }
+      ], { duration:320, easing:'cubic-bezier(.2,.8,.2,1)' });
+    }
+    function go(){ const v=q.value.trim(); if(!v) return; rocket(send); location.href='sophic-chat.html?q='+encodeURIComponent(v);
+ }
+    send.addEventListener('click', go);
+    q.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+
+    /* View‑Timeline fallback: if unsupported, mimic with IntersectionObserver */
+    const supportsVT = CSS.supports('animation-timeline: view()');
+    if(!supportsVT){
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{
+          if(e.isIntersecting) e.target.classList.add('in');
         });
-        animationId = requestAnimationFrame(animate);
-      }
-      resizeCanvas();
-      animate();
-      window.addEventListener('resize', resizeCanvas);
-    })();
-    // Enhanced floating particles
-    (() => {
-      const host = document.getElementById('particles');
-      function spawnParticle() {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.left = Math.random() * 100 + 'vw';
-        particle.style.animationDuration = (Math.random() * 10 + 20) + 's';
-        particle.style.animationDelay = (Math.random() * 8) + 's';
-        particle.style.width = particle.style.height = (Math.random() * 4 + 2) + 'px';
-        host.appendChild(particle);
-        setTimeout(() => particle.remove(), 35000);
-      }
-
-      for (let i = 0; i < 40; i++) spawnParticle();
-      setInterval(spawnParticle, 800);
-    })();
-
-    // BULLETPROOF: Input resize
-    userInput.addEventListener('input', function() {
-      this.style.height = '28px';
-      this.style.height = Math.max(28, Math.min(this.scrollHeight, 120)) + 'px';
-    });
-
-    // Enter to send
-    userInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        if (!sendButton.disabled && userInput.value.trim()) {
-          chatForm.dispatchEvent(new Event('submit'));
-        }
-      }
-    });
-    // State management
-    function showChatState() {
-      welcomeState.style.display = 'none';
-      chatState.classList.add('active');
-    }
-    function showWelcomeState() {
-      welcomeState.style.display = 'flex';
-      chatState.classList.remove('active');
-      chatTitle.textContent = 'How can I help you learn today?';
-    }
-    function addMessage(text, who) {
-      showChatState();
-      const div = document.createElement('div');
-      div.className = `msg ${who}`;
-
-      if (who === 'bot') {
-        div.innerHTML = marked.parse(String(text || ''));
-      } else {
-        div.textContent = String(text || '');
-      }
-
-      messages.appendChild(div);
-
-      // FIXED: Always scroll to bottom properly
-      requestAnimationFrame(() => {
-        messages.scrollTop = messages.scrollHeight;
+      }, {threshold:.2});
+      document.querySelectorAll('.reveal,.reveal-title,.reveal-tilt,.parallax').forEach(el=>{
+        el.style.opacity='0';
+        el.style.transformOrigin='center';
+        io.observe(el);
       });
+      const style = document.createElement('style');
+      style.textContent = `.in{ opacity:1!important; transform:none!important; clip-path: inset(0 0 0 0)!important; transition:.7s ease }`;
+      document.head.appendChild(style);
     }
-    function showTyping() {
-      const typing = document.createElement('div');
-      typing.className = 'typing';
-      typing.id = 'typing';
-      typing.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
-      messages.appendChild(typing);
-
-      // FIXED: Scroll to bottom when showing typing
-      requestAnimationFrame(() => {
-        messages.scrollTop = messages.scrollHeight;
-      });
-    }
-    function hideTyping() {
-      const typing = document.getElementById('typing');
-      if (typing) typing.remove();
-    }
-    function updateSuggestions(suggestionsList) {
-      suggestions.innerHTML = '';
-      if (!Array.isArray(suggestionsList) || suggestionsList.length === 0) return;
-
-      suggestionsList.forEach((suggestion, index) => {
-        const chip = document.createElement('div');
-        chip.className = 'suggestion';
-        chip.textContent = suggestion;
-        chip.style.animationDelay = (index * 0.1) + 's';
-        chip.addEventListener('click', () => {
-          userInput.value = suggestion;
-          userInput.focus();
-          userInput.style.height = '28px';
-          userInput.style.height = Math.max(28, Math.min(userInput.scrollHeight, 120)) + 'px';
-        });
-        suggestions.appendChild(chip);
-      });
-    }
-    // API functions
-    async function loadSessions() {
-      try {
-        const response = await fetch('http://127.0.0.1:8000/sessions');
-        const data = await response.json();
-        sessions = data.sessions;
-        renderSessions();
-      } catch (error) {
-        console.error('Failed to load sessions:', error);
-      }
-    }
-    function renderSessions() {
-      sessionsList.innerHTML = '';
-
-      if (sessions.length === 0) {
-        const emptyState = document.createElement('div');
-        emptyState.className = 'session';
-        emptyState.innerHTML = `
-          <div class="session-title">No conversations yet</div>
-          <div class="session-preview">Start chatting to see your history</div>
-        `;
-        emptyState.style.opacity = '0.6';
-        emptyState.style.cursor = 'default';
-        sessionsList.appendChild(emptyState);
-        return;
-      }
-      sessions.forEach((session, index) => {
-        const sessionDiv = document.createElement('div');
-        sessionDiv.className = `session ${session.id === currentSessionId ? 'active' : ''}`;
-        sessionDiv.style.animationDelay = (index * 0.05) + 's';
-        sessionDiv.onclick = () => loadSession(session.id);
-
-        sessionDiv.innerHTML = `
-          <div class="session-title">${session.title}</div>
-          <div class="session-preview">${session.preview || `${session.message_count} messages`}</div>
-        `;
-
-        sessionsList.appendChild(sessionDiv);
-      });
-    }
-    async function loadSession(sessionId) {
-      try {
-        currentSessionId = sessionId;
-        const response = await fetch(`http://127.0.0.1:8000/sessions/${sessionId}`);
-        const data = await response.json();
-
-        chatTitle.textContent = data.title;
-        messages.innerHTML = '';
-        showChatState();
-
-        data.messages.forEach((msg, index) => {
-          setTimeout(() => {
-            addMessage(msg.content, msg.role === 'assistant' ? 'bot' : msg.role);
-          }, index * 150);
-        });
-
-        renderSessions();
-      } catch (error) {
-        console.error('Failed to load session:', error);
-      }
-    }
-    function startNewChat() {
-      currentSessionId = null;
-      messages.innerHTML = '';
-      suggestions.innerHTML = '';
-      showWelcomeState();
-      renderSessions();
-      userInput.focus();
-    }
-    function askQuestion(question) {
-      userInput.value = question;
-      userInput.style.height = '28px';
-      userInput.style.height = Math.max(28, Math.min(userInput.scrollHeight, 120)) + 'px';
-      chatForm.dispatchEvent(new Event('submit'));
-    }
-    // FIXED form submission
-    chatForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const message = userInput.value.trim();
-      if (!message || sendButton.disabled) return;
-      addMessage(message, 'user');
-
-      // FIXED RESET - Simple and reliable
-      userInput.value = '';
-      userInput.style.height = '28px';
-
-      sendButton.disabled = true;
-      showTyping();
-      try {
-        const response = await fetch('http://127.0.0.1:8000/ask', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            question: message,
-            session_id: currentSessionId
-          })
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-        const data = await response.json();
-        hideTyping();
-
-        currentSessionId = data.session_id;
-        const botResponse = data.answer || 'I apologize, but I couldn\'t generate a proper response. Please try asking again.';
-
-        setTimeout(() => {
-          addMessage(botResponse, 'bot');
-
-          if (data.suggestions && data.suggestions.length > 0) {
-            setTimeout(() => {
-              updateSuggestions(data.suggestions);
-            }, 300);
-          }
-        }, 500);
-
-        if (chatTitle.textContent === 'How can I help you learn today?') {
-          const newTitle = data.meta?.session_title || (message.length > 30 ? message.substring(0, 30) + '...' : message);
-          chatTitle.textContent = newTitle;
-        }
-
-        setTimeout(() => {
-          loadSessions();
-        }, 1000);
-
-      } catch (error) {
-        hideTyping();
-        setTimeout(() => {
-          addMessage('I apologize, but I encountered a technical issue. Please check that the API server is running and try again.', 'bot');
-        }, 300);
-        console.error('Error:', error);
-      } finally {
-        sendButton.disabled = false;
-        userInput.focus();
-      }
-    });
-    // Initialize app
-    document.addEventListener('DOMContentLoaded', () => {
-      loadSessions();
-      userInput.focus();
-
-      setTimeout(() => {
-        document.body.style.opacity = '1';
-      }, 100);
-    });
   </script>
 </body>
 </html>
