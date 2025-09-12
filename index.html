@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sophic — Ask. Learn. Done.</title>
+  <meta name="description" content="Sophic is a free AI teacher for NCERT. Cinematic glassmorphism with liquid-glass animation and smooth micro-interactions." />
+
+  <!-- THEME TOKENS AND BASE -->
+  <style>
+    :root{
+      --bg-1:#080a0f; --bg-2:#0d1321; --acc-1:#6ea8ff; --acc-2:#9b8cff;
+      --txt:#f6f7fb; --txt-dim:#b9bfd1; --glass:rgba(255,255,255,0.06);
+      --glass-brd:rgba(255,255,255,0.18); --blur:24px;
+
+      /* Fluid spacing scale */
+      --space-1: clamp(8px, 1.2vw, 14px);
+      --space-2: clamp(12px, 1.8vw, 20px);
+      --space-3: clamp(18px, 2.6vw, 28px);
+      --space-4: clamp(26px, 4vw, 44px);
+      --section-pad: clamp(40px, 10vw, 120px);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      /* Calm, readable background */
+      background:
+        radial-gradient(1000px 700px at 50% 5%, rgba(110,168,255,.06), transparent 60%),
+        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      color: var(--txt);
+      overflow-x:hidden;
+    }
+
+    /* HERO BACKDROP (kept) */
+    #gl { position: fixed; inset: 0; width:100%; height:100%; z-index:-2; display:block }
+    .fx-overlay{
+      pointer-events:none; position:fixed; inset:0; z-index:-1;
+      background: radial-gradient(1200px 800px at 50% 20%, rgba(110,168,255,.12), transparent 60%),
+                  radial-gradient(900px 700px at 80% 90%, rgba(155,140,255,.12), transparent 60%),
+                  radial-gradient(70% 120% at 50% 120%, rgba(0,0,0,.35), transparent 60%);
+      filter:saturate(105%);
+    }
+
+    /* NAV */
+    .nav{
+      position:fixed; top:0; left:0; right:0; z-index:10; backdrop-filter: blur(16px);
+      background: linear-gradient(180deg, rgba(10,12,18,.6), rgba(10,12,18,.2));
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .nav-inner{max-width:1120px; margin:0 auto; padding:14px 20px; display:flex; align-items:center; justify-content:space-between}
+    .logo{font-weight:900; letter-spacing:.4px; font-size:1.15rem; background:linear-gradient(90deg, var(--acc-1), var(--acc-2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+    .nav a{color:var(--txt-dim); text-decoration:none; margin-left:20px; font-weight:600; font-size:.95rem; opacity:.9}
+    .nav a:hover{color:var(--txt)}
+
+    /* HERO (unchanged) */
+    .hero{min-height:100svh; display:grid; place-items:center; padding:120px 16px 64px}
+    .hero-inner{max-width:980px; width:100%; display:grid; gap:28px; text-align:center}
+    .kicker{display:inline-flex; align-items:center; gap:8px; margin:0 auto; padding:6px 12px; border-radius:999px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--glass-brd); backdrop-filter: blur(10px); color:var(--txt-dim); font-weight:700; letter-spacing:.2px; font-size:.85rem;
+      box-shadow: inset 0 0 0 0.5px rgba(255,255,255,.25), 0 10px 30px rgba(110,168,255,.08);
+    }
+    .k-dot{width:8px; height:8px; border-radius:50%; background: radial-gradient(circle at 30% 30%, var(--acc-1), var(--acc-2)); box-shadow:0 0 20px rgba(110,168,255,.7)}
+    .title{font-size: clamp(2rem, 6vw, 4.25rem); font-weight:900; line-height:1.05; letter-spacing:-.02em; margin:0 auto; max-width:900px; text-wrap:balance}
+    .title .accent{background:linear-gradient(90deg, var(--acc-1), var(--acc-2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+    .sub{margin:6px auto 0; max-width:760px; color:var(--txt-dim); font-size: clamp(1rem, 2.4vw, 1.25rem)}
+    .glass{
+      margin: 20px auto 0; width:min(820px, 92vw); padding:18px; border-radius:20px; position:relative;
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+      border:1px solid var(--glass-brd); backdrop-filter: blur(var(--blur));
+      box-shadow: 0 40px 120px rgba(110,168,255,.12), inset 0 1px 0 rgba(255,255,255,.25);
+      transition: transform .6s cubic-bezier(.2,.8,.2,1), box-shadow .6s, background .6s;
+    }
+    .glass::before{content:""; position:absolute; inset:-1px; border-radius:inherit; pointer-events:none;
+      background: radial-gradient(1200px 600px at var(--mx,50%) calc(var(--my,50%) - 20%), rgba(110,168,255,.15), transparent 60%),
+                  radial-gradient(600px 400px at calc(var(--mx,50%) + 10%) calc(var(--my,50%) + 10%), rgba(155,140,255,.14), transparent 60%);
+      mix-blend-mode: screen; filter: blur(10px); opacity:.75; transition:opacity .4s ease
+    }
+    .input-row{display:flex; align-items:center; gap:12px}
+    .input{flex:1; font:600 1.05rem/1.2 Inter, system-ui; color:var(--txt);
+      background: transparent; border:none; outline:none; padding:16px 18px; border-radius:14px; backdrop-filter: blur(2px);
+    }
+    .input::placeholder{color:#9aa3b8}
+    .send{
+      height:56px; min-width:56px; border-radius:16px; border:1px solid var(--glass-brd);
+      background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)); color:var(--txt);
+      display:grid; place-items:center; cursor:pointer; transition: transform .18s ease, box-shadow .18s ease;
+      box-shadow: 0 10px 30px rgba(110,168,255,.12);
+    }
+    .send:hover{transform: translateY(-2px); box-shadow: 0 16px 40px rgba(110,168,255,.18)}
+    .send svg{display:block}
+    .hint{margin:10px auto 0; max-width:760px; color:#8e98af; font-size:.9rem}
+    .chips{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px}
+    .chip{padding:6px 10px; border-radius:999px; border:1px solid var(--glass-brd); color:#cbd3e6;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04)); font-weight:700; font-size:.8rem; letter-spacing:.2px}
+
+    /* ACCESSIBLE HOME BUTTON */
+    .back-home{
+      position: fixed; bottom: 18px; left: 18px; z-index: 30;
+      padding: 10px 14px; font-weight: 800; border-radius: 12px;
+      color:#0b1020; background:#f6f7fb; border:1px solid rgba(255,255,255,.22);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35); text-decoration:none;
+    }
+    .back-home:focus-visible{ outline: 3px solid #6ea8ff; outline-offset: 3px }
+
+    /* CONTENT SECTIONS */
+    .section{ max-width:1120px; margin:0 auto; padding: var(--section-pad) 16px; position:relative }
+    .section + .section{ margin-top: var(--space-4) }
+
+    /* Readable frosted cards */
+    .card{
+      background: rgba(10,14,22,.76);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: var(--radius); color:#f6f7fb;
+      padding: clamp(18px, 3.6vw, 28px);
+      backdrop-filter: blur(12px) brightness(1.05) saturate(115%);
+      box-shadow: 0 24px 72px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.18);
+    }
+    @supports not (backdrop-filter: blur(2px)) { .card{ background: rgba(10,14,22,.9) } }
+
+    .section h2{ font-size: clamp(1.8rem, 4.2vw, 2.4rem); margin: 0 0 var(--space-1); letter-spacing:-.01em }
+    .lead{ color: var(--txt-dim); margin: 0 0 var(--space-2); font-size: clamp(1rem,2vw,1.1rem) }
+
+    .grid-3{ display:grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
+    .grid-2{ display:grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-2); }
+    .pill{ display:inline-block; padding:8px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); font-weight:700; font-size:.85rem; color:#dfe6fb }
+
+    .subjects{ display:flex; flex-wrap:wrap; gap:10px; margin-top:8px }
+    .subjects .chip{ padding:10px 14px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.06); font-weight:700; color:#e8edff }
+
+    @media (max-width: 900px){
+      .grid-3{ grid-template-columns: 1fr }
+      .grid-2{ grid-template-columns: 1fr }
+    }
+
+    /* ================== SCROLL‑DRIVEN ANIMATIONS (CSS View/Scroll Timelines) ================== */
+    /* Motion tokens */
+    @keyframes rise { from { opacity:0; transform: translateY(22px) } to { opacity:1; transform:none } }
+    @keyframes maskSweep { from { clip-path: inset(0 52% 0 52%) } to { clip-path: inset(0 0 0 0) } }
+    @keyframes tilt3d {
+      from { transform: perspective(900px) rotateX(6deg) rotateY(-6deg) translateY(16px); opacity:.85 }
+      to   { transform: perspective(900px) rotateX(0) rotateY(0); opacity:1 }
+    }
+
+    /* Base reveal utilities tied to view() timeline */
+    .reveal{ animation: rise linear both; animation-timeline: view(); animation-range: entry 12% cover 48% }
+    .reveal-title{ animation: maskSweep linear both; animation-timeline: view(); animation-range: entry 0% cover 35% }
+    .reveal-tilt{ animation: tilt3d ease-out both; animation-timeline: view(); animation-range: entry 12% cover 48% }
+
+    /* Parallax via a single keyframe and depth variable */
+    @keyframes parallaxY {
+      from { transform: translateY(calc(var(--depth, 1) * 22px)) }
+      to   { transform: translateY(calc(var(--depth, 1) * -22px)) }
+    }
+    .parallax{
+      animation: parallaxY linear both;
+      animation-timeline: view();
+      animation-range: entry -10% cover 120%;
+      will-change: transform;
+    }
+    .layer-bg   { --depth: .25 }
+    .layer-mid  { --depth: .5 }
+    .layer-fg   { --depth: 1 }
+
+    /* Named view timelines per tab to synchronize child animations */
+    .tab{ view-timeline: --tab block 10% 10% }
+    .tab .consume{ animation-timeline: --tab }
+
+    /* Decorative aura layers (simple shapes for depth, non‑intrusive) */
+    .aura{
+      position:absolute; inset:auto; pointer-events:none; filter: blur(40px) saturate(120%);
+      opacity:.45; border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(110,168,255,.55), rgba(155,140,255,.15) 60%, transparent 70%);
+    }
+    .aura.a{ width: 360px; height: 360px; top:-60px; left:-60px }
+    .aura.b{ width: 300px; height: 300px; bottom:-40px; right:-40px }
+  </style>
+</head>
+
+<body>
+  <!-- HERO BACKGROUND (kept) -->
+  <canvas id="gl" aria-hidden="true"></canvas>
+  <div class="fx-overlay" aria-hidden="true"></div>
+
+  <header class="nav" role="navigation" aria-label="Primary">
+    <div class="nav-inner">
+      <div class="logo" aria-label="Sophic">Sophic</div>
+      <nav>
+        <a href="#why">Why</a>
+        <a href="#how">How</a>
+        <a href="#subjects">Subjects</a>
+        <a href="#try">Try</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Back-to-front-page -->
+  <a class="back-home" href="/" aria-label="Back to front page">← Home</a>
+
+  <!-- HERO (unchanged content) -->
+  <main class="hero" id="top">
+    <div class="hero-inner">
+      <div class="kicker"><span class="k-dot"></span> Free AI Teacher for NCERT</div>
+      <h1 class="title">Ask. <span class="accent">Learn.</span> Done.</h1>
+      <p class="sub">The Coaching Alternative. Clear & Intuitive — CBSE Classes 6–10.</p>
+      <div class="glass" id="glass">
+        <div class="input-row">
+          <input id="q" class="input" autocomplete="off" placeholder="Try: Explain quadratic equations step-by-step" aria-label="Type your question"/>
+          <button class="send" id="send" aria-label="Ask Sophic">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M22 2L11 13"></path>
+              <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="chips" aria-hidden="true">
+          <div class="chip">NCERT-aligned</div>
+          <div class="chip">24/7</div>
+          <div class="chip">Free during beta</div>
+        </div>
+        <div class="hint" id="hint">Press Enter ↵ to ask • Try “Photosynthesis Class 10”</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================= TABS WITH VIEW‑TIMELINE ANIMATIONS AND PARALLAX ================= -->
+
+  <!-- WHY TAB -->
+  <section class="section tab" id="why">
+    <!-- subtle aura layers with parallax -->
+    <div class="aura a layer-bg parallax"></div>
+    <div class="aura b layer-mid parallax"></div>
+
+    <div class="card reveal-tilt consume">
+      <span class="pill">Why Sophic</span>
+      <h2 class="reveal-title consume">Clarity, speed, no fluff.</h2>
+      <p class="lead reveal consume">Focused NCERT help with step‑by‑step logic and worked examples — without 40‑minute detours. </p>
+
+      <div class="grid-3">
+        <div class="card reveal-tilt consume">
+          <h3 style="margin:0 0 var(--space-1)">Actually explains</h3>
+          <p class="lead" style="margin:0">Tight reasoning, labeled steps, and checks at each stage.</p>
+        </div>
+        <div class="card reveal-tilt consume">
+          <h3 style="margin:0 0 var(--space-1)">Ask precisely</h3>
+          <p class="lead" style="margin:0">Target any question or chapter; get the exact explanation needed.</p>
+        </div>
+        <div class="card reveal-tilt consume">
+          <h3 style="margin:0 0 var(--space-1)">Iterate fast</h3>
+          <p class="lead" style="margin:0">Follow‑ups until it clicks — patient and available 24/7.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW TAB -->
+  <section class="section tab" id="how">
+    <div class="card reveal-tilt consume">
+      <span class="pill">How it works</span>
+      <h2 class="reveal-title consume">Three steps, every time.</h2>
+      <div class="grid-3">
+        <article class="card reveal-tilt consume">
+          <h3 style="margin:0 0 var(--space-1)">1) Ask</h3>
+          <p class="lead" style="margin:0">Type the exact NCERT question or paste a problem.</p>
+        </article>
+        <article class="card reveal-tilt consume">
+          <h3 style="margin:0 0 var(--space-1)">2) Learn</h3>
+          <p class="lead" style="margin:0">Get a clean walkthrough with examples and self‑checks.</p>
+        </article>
+        <article class="card reveal-tilt consume">
+          <h3 style="margin:0 0 var(--space-1)">3) Review</h3>
+          <p class="lead" style="margin:0">Refine with follow‑ups, summaries, or quick quizzes.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUBJECTS TAB -->
+  <section class="section tab" id="subjects">
+    <div class="card reveal-tilt consume">
+      <span class="pill">Subjects</span>
+      <h2 class="reveal-title consume">NCERT Classes 6–10.</h2>
+      <p class="lead reveal consume">All core subjects, aligned to chapters — ready when needed. </p>
+      <div class="subjects">
+        <span class="chip reveal layer-fg parallax consume">Mathematics</span>
+        <span class="chip reveal layer-mid parallax consume">Physics</span>
+        <span class="chip reveal layer-fg parallax consume">Chemistry</span>
+        <span class="chip reveal layer-mid parallax consume">Biology</span>
+        <span class="chip reveal layer-fg parallax consume">History</span>
+        <span class="chip reveal layer-mid parallax consume">Geography</span>
+        <span class="chip reveal layer-fg parallax consume">Economics</span>
+        <span class="chip reveal layer-mid parallax consume">Civics</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRY -->
+  <section class="section tab" id="try">
+    <div class="card reveal-tilt consume" style="text-align:center">
+      <h2 class="reveal-title consume">Try it now</h2>
+      <p class="lead reveal consume">Instant demo — no sign‑up. Type a question in the box above and hit the paper plane. </p>
+    </div>
+  </section>
+
+  <footer class="section" style="text-align:center; color:#95a0ba">© 2025 Sophic — Student‑first.</footer>
+
+  <!-- =================== SCRIPTS =================== -->
+  <script>
+    /* ====== Liquid Glass WebGL (hero) — original shader kept ====== */
+    const canvas = document.getElementById('gl');
+    const gl = canvas.getContext('webgl', {antialias:true, preserveDrawingBuffer:true});
+    let W=0,H=0, DPR=Math.min(2, window.devicePixelRatio||1);
+    const vert = `attribute vec2 p; void main(){ gl_Position = vec4(p,0.0,1.0); }`;
+    const frag = `precision highp float; uniform vec2 r; uniform float t; uniform vec2 m;
+float hash(vec2 p){return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453123);}
+float noi(vec2 p){ vec2 i=floor(p); vec2 f=fract(p);
+float a=hash(i); float b=hash(i+vec2(1.,0.)); float c=hash(i+vec2(0.,1.)); float d=hash(i+vec2(1.,1.));
+vec2 u = f*f*(3.-2.*f); return mix(a,b,u.x)+ (c-a)*u.y*(1.-u.x) + (d-b)*u.x*u.y; }
+float smin(float a, float b, float k){ float h=clamp(.5+.5*(b-a)/k,0.,1.); return mix(b,a,h)-k*h*(1.-h); }
+float field(vec2 uv){ float d=1.; for(int i=0;i<6;i++){ float fi=float(i);
+vec2 c = 0.35*vec2(sin(t*0.4+fi*1.7), cos(t*0.33+fi*1.2)); float rad = 0.22 + 0.06*sin(t*0.7+fi);
+float s = length(uv-c) - rad; d = smin(d, s, 0.18); } return d; }
+vec3 bg(vec2 uv){ uv = uv*0.5+0.5; vec3 c1 = vec3(0.03,0.05,0.10); vec3 c2 = vec3(0.06,0.08,0.16);
+vec3 g = mix(c1, c2, smoothstep(0.,1.,uv.y)); float b1 = smoothstep(0.35,0.0, length(uv-vec2(0.2,0.2)) );
+float b2 = smoothstep(0.5,0.0, length(uv-vec2(0.9,0.9)) ); vec3 a1 = vec3(0.38,0.66,1.0); vec3 a2 = vec3(0.61,0.55,1.0);
+g += b1*a1*0.25 + b2*a2*0.22; return g; }
+void main(){ vec2 uv = (gl_FragCoord.xy - 0.5*r)/r.y; vec2 par = (m - 0.5*r)/r.y * 0.08; uv += par;
+float d = field(uv); vec2 e = vec2(0.0015, 0); float dx = field(uv+e.xy)-field(uv-e.xy); float dy = field(uv+e.yx)-field(uv-e.yx);
+vec2 n = normalize(vec2(dx,dy)); vec2 offs = n * (0.06 + 0.04*noi(uv*4.0 + t*0.2));
+vec3 colR = bg(uv + offs*1.02); vec3 colG = bg(uv + offs*0.98); vec3 colB = bg(uv + offs*0.94);
+vec3 refr = vec3(colR.r, colG.g, colB.b); float glass = smoothstep(0.04, -0.02, d); float edge = smoothstep(0.08, 0.0, abs(d));
+vec3 tint = mix(vec3(1.), vec3(0.94,0.96,1.0), 0.45); vec3 col = mix(bg(uv), refr*tint + 0.05*edge, glass);
+float sweep = 0.0; sweep += 0.7*exp(-20.0*pow(abs(dot(n, normalize(vec2(0.7,0.6)))), 1.5)); sweep *= glass; col += sweep*vec3(0.8,0.9,1.0);
+float vig = smoothstep(1.2, 0.3, length(uv)); col *= vig; gl_FragColor = vec4(col, 1.0); }`;
+    function compile(type, src){ const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){ throw new Error(gl.getShaderInfoLog(s)); } return s; }
+    if(gl){
+      const prog = gl.createProgram();
+      gl.attachShader(prog, compile(gl.VERTEX_SHADER, vert));
+      gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, frag));
+      gl.linkProgram(prog);
+      gl.useProgram(prog);
+      const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1,  -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+      const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      const uR = gl.getUniformLocation(prog, 'r'); const uT = gl.getUniformLocation(prog, 't'); const uM = gl.getUniformLocation(prog, 'm');
+      function resize(){ const w = Math.floor(innerWidth * DPR), h = Math.floor(innerHeight * DPR);
+        canvas.width=w; canvas.height=h; canvas.style.width=innerWidth+'px'; canvas.style.height=innerHeight+'px'; gl.viewport(0,0,w,h); }
+      addEventListener('resize', resize, {passive:true}); resize();
+      let start = performance.now(), mx=innerWidth*DPR/2, my=innerHeight*DPR/2;
+      const glass = document.getElementById('glass');
+      addEventListener('pointermove', e=>{ mx=e.clientX*DPR; my=e.clientY*DPR; glass?.style.setProperty('--mx', e.clientX+'px'); glass?.style.setProperty('--my', e.clientY+'px'); }, {passive:true});
+      (function loop(){
+        const t = (performance.now()-start)/1000;
+        gl.uniform2f(uR, canvas.width, canvas.height); gl.uniform1f(uT, t); gl.uniform2f(uM, mx, my);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        requestAnimationFrame(loop);
+      })();
+    }
+
+    /* HERO INPUT */
+    const q = document.getElementById('q');
+    const send = document.getElementById('send');
+    const hint = document.getElementById('hint');
+    const suggestions = [
+      'Explain quadratic equations step-by-step',
+      'Photosynthesis for Class 10 (short)',
+      "Newton's Laws with examples",
+      'Chemical equations — balance this: Fe + O2 → Fe2O3'
+    ];
+    let si=0, ci=0, typing=true;
+    function typeLoop(){
+      const s = suggestions[si];
+      if(typing){ ci++; q.setAttribute('placeholder', s.slice(0,ci));
+        if(ci===s.length){ typing=false; setTimeout(typeLoop, 1200); return; }
+        setTimeout(typeLoop, 28);
+      } else { ci--; q.setAttribute('placeholder', s.slice(0,ci));
+        if(ci===0){ typing=true; si=(si+1)%suggestions.length; setTimeout(typeLoop, 260); return; }
+        setTimeout(typeLoop, 16);
+      }
+    }
+    typeLoop();
+    function rocket(btn){
+      btn.animate([
+        { transform:'translateY(0) scale(1)', filter:'drop-shadow(0 10px 20px rgba(110,168,255,.3))' },
+        { transform:'translateY(-6px) scale(1.02)' },
+        { transform:'translateY(0) scale(1)' }
+      ], { duration:320, easing:'cubic-bezier(.2,.8,.2,1)' });
+    }
+    function go(){ const v=q.value.trim(); if(!v) return; rocket(send); location.href='sophic-chat.html?q='+encodeURIComponent(v);
+ }
+    send.addEventListener('click', go);
+    q.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+
+    /* View‑Timeline fallback: if unsupported, mimic with IntersectionObserver */
+    const supportsVT = CSS.supports('animation-timeline: view()');
+    if(!supportsVT){
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{
+          if(e.isIntersecting) e.target.classList.add('in');
+        });
+      }, {threshold:.2});
+      document.querySelectorAll('.reveal,.reveal-title,.reveal-tilt,.parallax').forEach(el=>{
+        el.style.opacity='0';
+        el.style.transformOrigin='center';
+        io.observe(el);
+      });
+      const style = document.createElement('style');
+      style.textContent = `.in{ opacity:1!important; transform:none!important; clip-path: inset(0 0 0 0)!important; transition:.7s ease }`;
+      document.head.appendChild(style);
+    }
+  </script>
+</body>
+</html>
