@@ -1,4 +1,5 @@
 import os, json, time, uuid, re
+import gzip
 import numpy as np
 from collections import OrderedDict
 from typing import Optional, Dict, Any, List
@@ -32,13 +33,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load NCERT embeddings database
+# Load NCERT embeddings database (with compression support)
 try:
-    with open('chunks_with_gemini_embeddings.json', 'r', encoding='utf-8') as f:
+    # Try compressed file first (.gz format)
+    print("📂 Attempting to load compressed embeddings...")
+    with gzip.open('chunks_with_gemini_embeddings.json.gz', 'rt', encoding='utf-8') as f:
         EMBEDDINGS_DATA = json.load(f)
-    print(f"✅ Loaded {len(EMBEDDINGS_DATA)} NCERT chunks with embeddings")
+    print(f"✅ Loaded {len(EMBEDDINGS_DATA)} NCERT chunks from compressed file")
+except FileNotFoundError:
+    # Fallback to regular file if compressed doesn't exist
+    try:
+        print("📂 Compressed file not found, trying regular file...")
+        with open('chunks_with_gemini_embeddings.json', 'r', encoding='utf-8') as f:
+            EMBEDDINGS_DATA = json.load(f)
+        print(f"✅ Loaded {len(EMBEDDINGS_DATA)} NCERT chunks from regular file")
+    except Exception as e:
+        print(f"❌ Failed to load embeddings: {e}")
+        EMBEDDINGS_DATA = []
 except Exception as e:
-    print(f"❌ Failed to load embeddings: {e}")
+    print(f"❌ Error loading compressed embeddings: {e}")
     EMBEDDINGS_DATA = []
 
 def cosine_similarity(a, b):
@@ -51,6 +64,7 @@ def cosine_similarity(a, b):
 def search_relevant_chunks(query: str, top_k: int = 3) -> List[Dict[str, Any]]:
     """Search for most relevant NCERT content chunks"""
     if not EMBEDDINGS_DATA:
+        print("⚠️ No embeddings data available for search")
         return []
 
     try:
@@ -72,7 +86,10 @@ def search_relevant_chunks(query: str, top_k: int = 3) -> List[Dict[str, Any]]:
 
         # Sort by similarity and return top chunks
         similarities.sort(key=lambda x: x['similarity'], reverse=True)
-        return similarities[:top_k]
+        top_chunks = similarities[:top_k]
+
+        print(f"🔍 Found {len(top_chunks)} relevant chunks for query")
+        return top_chunks
 
     except Exception as e:
         print(f"❌ Error in chunk search: {e}")
@@ -182,20 +199,13 @@ def compose_messages(session: Session, user_text: str, context_chunks: List[Dict
 
     # Build enhanced system prompt with NCERT context
     enhanced_prompt = SYSTEM_PROMPT
-    if context_chunks:
-        enhanced_prompt += "
-
-📚 RELEVANT NCERT CONTENT:
-"
+    if context_chunks and len(context_chunks) > 0:
+        enhanced_prompt += "\n\n📚 RELEVANT NCERT CONTENT:\n"
         for i, chunk in enumerate(context_chunks, 1):
-            enhanced_prompt += f"
-[Context {i}] {chunk['text'][:800]}..."
+            enhanced_prompt += f"\n[Context {i}] {chunk['text'][:800]}..."
             if 'metadata' in chunk and chunk['metadata']:
-                enhanced_prompt += f"
-(Source: {chunk['metadata']})"
-        enhanced_prompt += "
-
-Use the above NCERT content to provide accurate, curriculum-aligned answers."
+                enhanced_prompt += f"\n(Source: {chunk['metadata']})"
+        enhanced_prompt += "\n\nUse the above NCERT content to provide accurate, curriculum-aligned answers."
 
     if history:
         if history[-1]["role"] == "user":
@@ -300,7 +310,8 @@ async def ask(req: Request, body: AskReq):
             "model": MODEL,
             "message_count": len(session.messages),
             "session_title": session.title,
-            "chunks_found": len(relevant_chunks)
+            "chunks_found": len(relevant_chunks),
+            "using_ncert_data": len(relevant_chunks) > 0
         }
     })
 
@@ -352,7 +363,8 @@ def status():
         "model": MODEL,
         "total_sessions": len(sessions),
         "embeddings_loaded": len(EMBEDDINGS_DATA),
-        "version": "4.0-rag-enabled"
+        "ncert_chunks_available": len(EMBEDDINGS_DATA) > 0,
+        "version": "4.0-rag-compression-enabled"
     }
 
 if __name__ == "__main__":
