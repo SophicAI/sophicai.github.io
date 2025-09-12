@@ -7,7 +7,6 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
     :root {
       --bg: radial-gradient(ellipse at top, #0a0f1c 0%, #050812 40%, #020408 100%);
       --glass: rgba(15, 20, 35, 0.6);
@@ -27,9 +26,8 @@
       --user-bg: linear-gradient(135deg, rgba(34, 229, 122, 0.15), rgba(0, 200, 255, 0.1));
       --bot-bg: linear-gradient(135deg, rgba(15, 20, 35, 0.9), rgba(25, 30, 45, 0.8));
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    
+
     html, body { 
       height: 100%; 
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -39,7 +37,6 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
-
     /* ENHANCED LIQUID BACKGROUND */
     #liquid-stage { 
       position: fixed; 
@@ -47,7 +44,7 @@
       z-index: -2; 
       overflow: hidden;
     }
-    
+
     #liquid-canvas { 
       width: 100vw; 
       height: 100vh; 
@@ -55,12 +52,10 @@
       opacity: 0.9;
       animation: canvasPulse 8s ease-in-out infinite;
     }
-
     @keyframes canvasPulse {
       0%, 100% { opacity: 0.9; }
       50% { opacity: 1; }
     }
-
     /* FLOATING PARTICLES */
     #particles { 
       position: fixed; 
@@ -68,7 +63,7 @@
       z-index: -1; 
       pointer-events: none; 
     }
-    
+
     .particle { 
       position: absolute; 
       width: 3px; 
@@ -78,7 +73,7 @@
       box-shadow: 0 0 12px var(--accent-glow);
       animation: float 25s linear infinite;
     }
-    
+
     @keyframes float { 
       0% { transform: translateY(110vh) translateX(0) rotate(0deg); opacity: 0; } 
       10% { opacity: 1; }
@@ -86,15 +81,15 @@
       90% { opacity: 1; }
       100% { transform: translateY(-10vh) translateX(-20px) rotate(360deg); opacity: 0; } 
     }
-
-    /* MAIN LAYOUT */
+    /* MAIN LAYOUT - FIXED GRID */
     .app { 
       display: grid; 
       grid-template-columns: 300px 1fr; 
       height: 100vh; 
       gap: 0;
+      position: fixed;
+      inset: 0;
     }
-
     /* ENHANCED SIDEBAR */
     .sidebar {
       background: var(--glass-strong);
@@ -106,7 +101,6 @@
       position: relative;
       overflow: hidden;
     }
-
     .sidebar::before {
       content: '';
       position: absolute;
@@ -117,13 +111,11 @@
       background: linear-gradient(90deg, transparent, var(--accent), transparent);
       animation: shimmer 3s infinite;
     }
-
     @keyframes shimmer {
       0% { transform: translateX(-100%); opacity: 0; }
       50% { opacity: 1; }
       100% { transform: translateX(100%); opacity: 0; }
     }
-
     .sidebar-header {
       padding: 24px;
       border-bottom: 1px solid var(--border);
@@ -132,7 +124,6 @@
       justify-content: space-between;
       background: var(--glass-light);
     }
-
     .logo {
       display: flex;
       align-items: center;
@@ -140,7 +131,6 @@
       font-weight: 600;
       font-size: 1.2rem;
     }
-
     .logo-dot {
       width: 10px;
       height: 10px;
@@ -149,12 +139,10 @@
       box-shadow: 0 0 20px var(--accent-glow);
       animation: pulse 2s infinite ease-in-out;
     }
-
     @keyframes pulse {
       0%, 100% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.2); opacity: 0.8; }
     }
-
     .new-chat {
       width: 36px;
       height: 36px;
@@ -170,14 +158,13 @@
       font-size: 18px;
       font-weight: 600;
     }
-    
+
     .new-chat:hover {
       background: var(--accent);
       color: #000;
       transform: scale(1.1) rotate(90deg);
       box-shadow: 0 8px 25px var(--accent-glow);
     }
-
     .sessions {
       flex: 1;
       overflow-y: auto;
@@ -186,14 +173,12 @@
       flex-direction: column;
       gap: 8px;
     }
-
     .sessions::-webkit-scrollbar { width: 4px; }
     .sessions::-webkit-scrollbar-track { background: transparent; }
     .sessions::-webkit-scrollbar-thumb { 
       background: var(--border); 
       border-radius: 2px; 
     }
-
     .session {
       padding: 16px;
       border-radius: 14px;
@@ -205,7 +190,6 @@
       overflow: hidden;
       transform-style: preserve-3d;
     }
-
     .session::before {
       content: '';
       position: absolute;
@@ -215,27 +199,22 @@
       opacity: 0;
       transition: opacity 0.3s ease;
     }
-
     .session:hover::before {
       opacity: 1;
     }
-
     .session:hover {
       border-color: var(--border);
       transform: translateX(6px);
       box-shadow: var(--shadow);
     }
-
     .session.active {
       background: rgba(34, 229, 122, 0.1);
       border-color: var(--accent-glow);
       transform: translateX(8px);
     }
-
     .session.active::before {
       opacity: 0.5;
     }
-
     .session-title {
       font-weight: 500;
       font-size: 0.95rem;
@@ -246,7 +225,6 @@
       position: relative;
       z-index: 1;
     }
-
     .session-preview {
       font-size: 0.8rem;
       color: var(--text-dim);
@@ -256,8 +234,7 @@
       position: relative;
       z-index: 1;
     }
-
-    /* ENHANCED MAIN PANEL */
+    /* ENHANCED MAIN PANEL - FIXED LAYOUT */
     .main {
       display: flex;
       flex-direction: column;
@@ -266,8 +243,8 @@
       animation: slideInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
       overflow: hidden;
+      height: 100vh;
     }
-
     .main::before {
       content: '';
       position: absolute;
@@ -278,7 +255,6 @@
       background: linear-gradient(90deg, transparent, var(--accent), transparent);
       animation: shimmer 4s infinite reverse;
     }
-
     .header {
       display: flex;
       justify-content: space-between;
@@ -287,8 +263,8 @@
       border-bottom: 1px solid var(--border);
       background: var(--glass-strong);
       backdrop-filter: blur(20px);
+      flex-shrink: 0;
     }
-
     .title { 
       font-weight: 600; 
       font-size: 1.2rem; 
@@ -297,7 +273,6 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-
     .status { 
       display: flex; 
       align-items: center; 
@@ -305,7 +280,6 @@
       color: var(--text-dim); 
       font-size: 0.9rem; 
     }
-
     .status-dot { 
       width: 8px; 
       height: 8px; 
@@ -314,7 +288,6 @@
       box-shadow: 0 0 12px var(--accent-glow);
       animation: pulse 2s infinite;
     }
-
     /* ENHANCED WELCOME STATE */
     .welcome-state {
       flex: 1;
@@ -325,13 +298,12 @@
       padding: 48px;
       text-align: center;
       animation: fadeInScale 1s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow-y: auto;
     }
-
     @keyframes fadeInScale {
       0% { opacity: 0; transform: scale(0.9) translateY(20px); }
       100% { opacity: 1; transform: scale(1) translateY(0); }
     }
-
     .welcome-state h1 {
       font-size: 3rem;
       font-weight: 300;
@@ -342,12 +314,10 @@
       background-clip: text;
       animation: textShine 3s ease-in-out infinite;
     }
-
     @keyframes textShine {
       0%, 100% { filter: brightness(1); }
       50% { filter: brightness(1.2); }
     }
-
     .welcome-state p {
       color: var(--text-dim);
       font-size: 1.15rem;
@@ -356,12 +326,10 @@
       line-height: 1.7;
       animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
     }
-
     @keyframes slideUp {
       0% { opacity: 0; transform: translateY(30px); }
       100% { opacity: 1; transform: translateY(0); }
     }
-
     .starter-cards {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -370,7 +338,6 @@
       max-width: 700px;
       animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
     }
-
     .card {
       padding: 28px 24px;
       background: var(--glass-strong);
@@ -384,7 +351,6 @@
       overflow: hidden;
       transform-style: preserve-3d;
     }
-
     .card::before {
       content: '';
       position: absolute;
@@ -393,18 +359,15 @@
       opacity: 0;
       transition: opacity 0.3s ease;
     }
-
     .card:hover::before {
       opacity: 1;
     }
-
     .card:hover {
       background: rgba(34, 229, 122, 0.1);
       border-color: var(--accent-glow);
       transform: translateY(-8px);
       box-shadow: var(--shadow-strong);
     }
-
     .card-icon {
       width: 48px;
       height: 48px;
@@ -418,24 +381,20 @@
       color: #000;
       transition: all 0.3s ease;
     }
-
     .card:hover .card-icon {
       transform: scale(1.1) rotate(5deg);
       box-shadow: 0 8px 25px var(--accent-glow);
     }
-
     .card h3 {
       font-size: 1.1rem;
       font-weight: 600;
       margin-bottom: 10px;
     }
-
     .card p {
       font-size: 0.9rem;
       color: var(--text-dim);
       line-height: 1.5;
     }
-
     .tab-bar {
       display: flex;
       gap: 6px;
@@ -445,7 +404,6 @@
       border: 1px solid var(--border);
       animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
     }
-
     .tab {
       padding: 12px 20px;
       background: transparent;
@@ -460,47 +418,45 @@
       align-items: center;
       gap: 8px;
     }
-
     .tab.active {
       background: var(--accent);
       color: #000;
       transform: scale(1.05);
       box-shadow: 0 4px 15px var(--accent-glow);
     }
-
     .tab:hover:not(.active) {
       background: var(--glass-hover);
       color: var(--text);
       transform: translateY(-2px);
     }
-
-    /* ENHANCED CHAT STATE */
+    /* ENHANCED CHAT STATE - FIXED LAYOUT */
     .chat-state {
       flex: 1;
       display: none;
       flex-direction: column;
       animation: fadeIn 0.6s ease;
+      min-height: 0; /* KEY FIX: Allow flexbox to shrink */
+      overflow: hidden;
     }
-
     .chat-state.active {
       display: flex;
     }
-
     @keyframes fadeIn {
       0% { opacity: 0; }
       100% { opacity: 1; }
     }
-
+    /* FIXED MESSAGES CONTAINER */
     .messages {
       flex: 1;
       overflow-y: auto;
+      overflow-x: hidden;
       padding: 32px;
       display: flex;
       flex-direction: column;
       gap: 20px;
       position: relative;
+      min-height: 0; /* KEY FIX: Allow container to shrink */
     }
-
     .messages::before,
     .messages::after {
       content: '';
@@ -511,25 +467,22 @@
       pointer-events: none;
       z-index: 1;
       display: block;
+      flex-shrink: 0;
     }
-
     .messages::before { 
       top: 0; 
       background: linear-gradient(to bottom, rgba(0,0,0,0.3), transparent); 
     }
-
     .messages::after { 
       bottom: 0; 
       background: linear-gradient(to top, rgba(0,0,0,0.3), transparent); 
     }
-
     .messages::-webkit-scrollbar { width: 6px; }
     .messages::-webkit-scrollbar-track { background: transparent; }
     .messages::-webkit-scrollbar-thumb { 
       background: var(--border); 
       border-radius: 3px; 
     }
-
     .msg {
       max-width: 75%;
       padding: 20px 24px;
@@ -541,8 +494,8 @@
       transition: all 0.3s ease;
       animation: messageSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
       line-height: 1.6;
+      flex-shrink: 0; /* Prevent messages from shrinking */
     }
-
     @keyframes messageSlideIn { 
       0% { 
         opacity: 0; 
@@ -556,7 +509,6 @@
         transform: scale(1); 
       } 
     }
-
     .msg::before {
       content: '';
       position: absolute;
@@ -566,28 +518,22 @@
       opacity: 0;
       transition: opacity 0.3s ease;
     }
-
-    /* FIXED: Simple hover without broken 3D */
     .msg:hover::before {
       opacity: 1;
     }
-
     .msg:hover {
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
       transform: translateY(-2px);
     }
-
     .user {
       align-self: flex-end;
       background: var(--user-bg);
       border-color: var(--accent-glow);
     }
-
     .bot {
       align-self: flex-start;
       background: var(--bot-bg);
     }
-
     /* ENHANCED SUGGESTIONS */
     .suggestions {
       padding: 0 32px 20px;
@@ -595,8 +541,8 @@
       gap: 12px;
       flex-wrap: wrap;
       animation: slideUp 0.5s ease;
+      flex-shrink: 0;
     }
-
     .suggestion {
       padding: 10px 18px;
       background: var(--glass-light);
@@ -609,24 +555,23 @@
       backdrop-filter: blur(15px);
       white-space: nowrap;
     }
-
     .suggestion:hover {
       background: var(--accent);
       color: #000;
       transform: translateY(-3px) scale(1.05);
       box-shadow: 0 8px 25px var(--accent-glow);
     }
-
-    /* FIXED INPUT - NEVER VANISHES */
+    /* FIXED INPUT - ALWAYS VISIBLE AND POSITIONED */
     .input {
       padding: 24px 32px;
       border-top: 1px solid var(--border);
       background: var(--glass-strong);
       backdrop-filter: blur(30px);
-      min-height: 80px !important;
       flex-shrink: 0 !important;
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
     }
-
     .input-bar {
       display: flex;
       gap: 16px;
@@ -639,10 +584,8 @@
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
-      min-height: 60px !important;
-      flex-shrink: 0 !important;
+      min-height: 60px;
     }
-
     .input-bar::before {
       content: '';
       position: absolute;
@@ -651,17 +594,14 @@
       opacity: 0;
       transition: opacity 0.3s ease;
     }
-
     .input-bar:focus-within {
       border-color: var(--accent-glow);
       box-shadow: 0 0 0 3px rgba(34, 229, 122, 0.2), var(--shadow-strong);
       transform: scale(1.01);
     }
-
     .input-bar:focus-within::before {
       opacity: 1;
     }
-
     #userInput {
       flex: 1;
       background: transparent;
@@ -670,19 +610,16 @@
       color: var(--text);
       font: inherit;
       line-height: 1.6;
-      min-height: 28px !important;
+      min-height: 28px;
       max-height: 120px;
       overflow-y: auto;
       resize: none;
       position: relative;
       z-index: 1;
-      flex-shrink: 0 !important;
     }
-
     #userInput::placeholder { 
       color: var(--text-muted); 
     }
-
     #sendButton {
       width: 44px;
       height: 44px;
@@ -698,17 +635,15 @@
       transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       box-shadow: 0 6px 20px var(--accent-glow);
       font-size: 18px;
+      flex-shrink: 0;
     }
-
     #sendButton:hover {
       transform: translateY(-3px) scale(1.05);
       box-shadow: 0 12px 30px var(--accent-glow);
     }
-
     #sendButton:active {
       transform: translateY(-1px) scale(0.98);
     }
-
     #sendButton:disabled {
       background: rgba(255, 255, 255, 0.1);
       color: var(--text-muted);
@@ -716,7 +651,6 @@
       transform: none;
       box-shadow: none;
     }
-
     /* ENHANCED TYPING INDICATOR */
     .typing {
       display: inline-flex;
@@ -728,8 +662,8 @@
       background: var(--bot-bg);
       align-self: flex-start;
       animation: messageSlideIn 0.4s ease;
+      flex-shrink: 0;
     }
-
     .dot {
       width: 8px;
       height: 8px;
@@ -737,10 +671,8 @@
       background: var(--accent);
       animation: typingBounce 1.4s infinite ease-in-out;
     }
-
     .dot:nth-child(2) { animation-delay: 0.2s; }
     .dot:nth-child(3) { animation-delay: 0.4s; }
-
     @keyframes typingBounce {
       0%, 60%, 100% {
         transform: translateY(0);
@@ -751,60 +683,51 @@
         opacity: 1;
       }
     }
-
     /* ENHANCED ANIMATIONS */
     @keyframes slideInLeft {
       0% { transform: translateX(-100%); opacity: 0; }
       100% { transform: translateX(0); opacity: 1; }
     }
-
     @keyframes slideInRight {
       0% { transform: translateX(100%); opacity: 0; }
       100% { transform: translateX(0); opacity: 1; }
     }
-
     /* RESPONSIVE DESIGN */
     @media (max-width: 768px) {
       .app { 
         grid-template-columns: 1fr; 
         grid-template-rows: auto 1fr;
       }
-      
+
       .sidebar { 
         display: none; 
       }
-      
+
       .starter-cards { 
         grid-template-columns: 1fr; 
         gap: 16px;
       }
-      
+
       .msg { 
         max-width: 90%; 
       }
-
       .welcome-state h1 {
         font-size: 2.2rem;
       }
-
       .messages {
         padding: 20px;
       }
-
       .input {
         padding: 16px 20px;
       }
     }
-
     @media (max-width: 480px) {
       .welcome-state {
         padding: 32px 20px;
       }
-
       .welcome-state h1 {
         font-size: 1.8rem;
       }
-
       .card {
         padding: 20px 16px;
       }
@@ -817,7 +740,6 @@
     <canvas id="liquid-canvas"></canvas>
   </div>
   <div id="particles"></div>
-
   <div class="app">
     <!-- Enhanced Sidebar -->
     <div class="sidebar">
@@ -832,7 +754,6 @@
         <!-- Sessions populated dynamically -->
       </div>
     </div>
-
     <!-- Enhanced Main Panel -->
     <div class="main">
       <div class="header">
@@ -842,12 +763,10 @@
           Online
         </div>
       </div>
-
       <!-- Enhanced Welcome State -->
       <div class="welcome-state" id="welcomeState">
         <h1>How can I help you learn today?</h1>
         <p>Ask me anything about your studies. I'm your personal NCERT tutor, ready to provide detailed explanations, step-by-step solutions, and help you understand complex topics with ease.</p>
-
         <div class="starter-cards">
           <div class="card" onclick="askQuestion('Explain photosynthesis with examples and real-world applications')">
             <div class="card-icon">🌱</div>
@@ -865,18 +784,15 @@
             <p>Deep analysis of texts, themes, and literary techniques</p>
           </div>
         </div>
-
         <div class="tab-bar">
                   </div>
       </div>
-
       <!-- Enhanced Chat State -->
       <div class="chat-state" id="chatState">
         <div class="messages" id="messages"></div>
         <div class="suggestions" id="suggestions"></div>
       </div>
-
-      <!-- FIXED Input -->
+      <!-- FIXED Input - Always visible -->
       <div class="input">
         <form class="input-bar" id="chatForm">
           <textarea id="userInput" placeholder="Ask me anything about your studies..." rows="1"></textarea>
@@ -885,12 +801,10 @@
       </div>
     </div>
   </div>
-
   <script>
     // Global state
     let currentSessionId = null;
     let sessions = [];
-
     // DOM references
     const welcomeState = document.getElementById('welcomeState');
     const chatState = document.getElementById('chatState');
@@ -901,13 +815,11 @@
     const sessionsList = document.getElementById('sessionsList');
     const chatTitle = document.getElementById('chatTitle');
     const suggestions = document.getElementById('suggestions');
-
     // Enhanced liquid background
     (() => {
       const canvas = document.getElementById('liquid-canvas');
       const ctx = canvas.getContext('2d');
       let animationId;
-
       function resizeCanvas() {
         canvas.width = window.innerWidth * window.devicePixelRatio;
         canvas.height = window.innerHeight * window.devicePixelRatio;
@@ -915,7 +827,6 @@
         canvas.style.height = window.innerHeight + 'px';
         ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
       }
-
       const orbs = Array.from({ length: 15 }, () => ({
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight,
@@ -926,43 +837,34 @@
         opacity: Math.random() * 0.4 + 0.2,
         pulseSpeed: Math.random() * 0.02 + 0.01
       }));
-
       let time = 0;
-
       function animate() {
         ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
         time += 0.016;
-        
+
         orbs.forEach((orb, i) => {
           orb.x += orb.vx;
           orb.y += orb.vy;
-
           if (orb.x < -orb.radius || orb.x > window.innerWidth + orb.radius) orb.vx *= -1;
           if (orb.y < -orb.radius || orb.y > window.innerHeight + orb.radius) orb.vy *= -1;
-
           const pulse = Math.sin(time * orb.pulseSpeed) * 0.3 + 1;
           const currentRadius = orb.radius * pulse;
           const currentOpacity = orb.opacity * pulse;
-
           const gradient = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, currentRadius);
           gradient.addColorStop(0, `hsla(${orb.hue}, 90%, 70%, ${currentOpacity})`);
           gradient.addColorStop(0.4, `hsla(${orb.hue}, 80%, 60%, ${currentOpacity * 0.6})`);
           gradient.addColorStop(1, 'hsla(0, 0%, 0%, 0)');
-
           ctx.fillStyle = gradient;
           ctx.beginPath();
           ctx.arc(orb.x, orb.y, currentRadius, 0, Math.PI * 2);
           ctx.fill();
         });
-
         animationId = requestAnimationFrame(animate);
       }
-
       resizeCanvas();
       animate();
       window.addEventListener('resize', resizeCanvas);
     })();
-
     // Enhanced floating particles
     (() => {
       const host = document.getElementById('particles');
@@ -976,21 +878,15 @@
         host.appendChild(particle);
         setTimeout(() => particle.remove(), 35000);
       }
-      
+
       for (let i = 0; i < 40; i++) spawnParticle();
       setInterval(spawnParticle, 800);
     })();
 
-    // BULLETPROOF: Input resize that NEVER collapses
+    // BULLETPROOF: Input resize
     userInput.addEventListener('input', function() {
       this.style.height = '28px';
-      this.parentElement.style.minHeight = '60px';
-      
-      const newHeight = Math.max(28, Math.min(this.scrollHeight, 120));
-      this.style.height = newHeight + 'px';
-      
-      this.parentElement.style.height = 'auto';
-      this.parentElement.style.minHeight = Math.max(60, newHeight + 32) + 'px';
+      this.style.height = Math.max(28, Math.min(this.scrollHeight, 120)) + 'px';
     });
 
     // Enter to send
@@ -1002,61 +898,54 @@
         }
       }
     });
-
     // State management
     function showChatState() {
       welcomeState.style.display = 'none';
       chatState.classList.add('active');
     }
-
     function showWelcomeState() {
       welcomeState.style.display = 'flex';
       chatState.classList.remove('active');
       chatTitle.textContent = 'How can I help you learn today?';
     }
-
     function addMessage(text, who) {
       showChatState();
       const div = document.createElement('div');
       div.className = `msg ${who}`;
-      
+
       if (who === 'bot') {
         div.innerHTML = marked.parse(String(text || ''));
       } else {
         div.textContent = String(text || '');
       }
-      
-      messages.appendChild(div);
-      
-      setTimeout(() => {
-        messages.scrollTo({
-          top: messages.scrollHeight,
-          behavior: 'smooth'
-        });
-      }, 100);
-    }
 
+      messages.appendChild(div);
+
+      // FIXED: Always scroll to bottom properly
+      requestAnimationFrame(() => {
+        messages.scrollTop = messages.scrollHeight;
+      });
+    }
     function showTyping() {
       const typing = document.createElement('div');
       typing.className = 'typing';
       typing.id = 'typing';
       typing.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
       messages.appendChild(typing);
-      messages.scrollTo({
-        top: messages.scrollHeight,
-        behavior: 'smooth'
+
+      // FIXED: Scroll to bottom when showing typing
+      requestAnimationFrame(() => {
+        messages.scrollTop = messages.scrollHeight;
       });
     }
-
     function hideTyping() {
       const typing = document.getElementById('typing');
       if (typing) typing.remove();
     }
-
     function updateSuggestions(suggestionsList) {
       suggestions.innerHTML = '';
       if (!Array.isArray(suggestionsList) || suggestionsList.length === 0) return;
-      
+
       suggestionsList.forEach((suggestion, index) => {
         const chip = document.createElement('div');
         chip.className = 'suggestion';
@@ -1066,14 +955,11 @@
           userInput.value = suggestion;
           userInput.focus();
           userInput.style.height = '28px';
-          const newHeight = Math.max(28, Math.min(userInput.scrollHeight, 120));
-          userInput.style.height = newHeight + 'px';
-          userInput.closest('.input-bar').style.minHeight = Math.max(60, newHeight + 32) + 'px';
+          userInput.style.height = Math.max(28, Math.min(userInput.scrollHeight, 120)) + 'px';
         });
         suggestions.appendChild(chip);
       });
     }
-
     // API functions
     async function loadSessions() {
       try {
@@ -1085,10 +971,9 @@
         console.error('Failed to load sessions:', error);
       }
     }
-
     function renderSessions() {
       sessionsList.innerHTML = '';
-      
+
       if (sessions.length === 0) {
         const emptyState = document.createElement('div');
         emptyState.className = 'session';
@@ -1101,44 +986,41 @@
         sessionsList.appendChild(emptyState);
         return;
       }
-
       sessions.forEach((session, index) => {
         const sessionDiv = document.createElement('div');
         sessionDiv.className = `session ${session.id === currentSessionId ? 'active' : ''}`;
         sessionDiv.style.animationDelay = (index * 0.05) + 's';
         sessionDiv.onclick = () => loadSession(session.id);
-        
+
         sessionDiv.innerHTML = `
           <div class="session-title">${session.title}</div>
           <div class="session-preview">${session.preview || `${session.message_count} messages`}</div>
         `;
-        
+
         sessionsList.appendChild(sessionDiv);
       });
     }
-
     async function loadSession(sessionId) {
       try {
         currentSessionId = sessionId;
         const response = await fetch(`http://127.0.0.1:8000/sessions/${sessionId}`);
         const data = await response.json();
-        
+
         chatTitle.textContent = data.title;
         messages.innerHTML = '';
         showChatState();
-        
+
         data.messages.forEach((msg, index) => {
           setTimeout(() => {
             addMessage(msg.content, msg.role === 'assistant' ? 'bot' : msg.role);
           }, index * 150);
         });
-        
+
         renderSessions();
       } catch (error) {
         console.error('Failed to load session:', error);
       }
     }
-
     function startNewChat() {
       currentSessionId = null;
       messages.innerHTML = '';
@@ -1147,42 +1029,26 @@
       renderSessions();
       userInput.focus();
     }
-
     function askQuestion(question) {
       userInput.value = question;
       userInput.style.height = '28px';
-      const newHeight = Math.max(28, Math.min(userInput.scrollHeight, 120));
-      userInput.style.height = newHeight + 'px';
-      userInput.closest('.input-bar').style.minHeight = Math.max(60, newHeight + 32) + 'px';
+      userInput.style.height = Math.max(28, Math.min(userInput.scrollHeight, 120)) + 'px';
       chatForm.dispatchEvent(new Event('submit'));
     }
-
-    // BULLETPROOF form submission
+    // FIXED form submission
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       const message = userInput.value.trim();
       if (!message || sendButton.disabled) return;
-
       addMessage(message, 'user');
-      
-      // BULLETPROOF RESET
+
+      // FIXED RESET - Simple and reliable
       userInput.value = '';
       userInput.style.height = '28px';
-      userInput.style.minHeight = '28px';
-      
-      const inputBar = userInput.closest('.input-bar');
-      inputBar.style.height = 'auto';
-      inputBar.style.minHeight = '60px';
-      
-      setTimeout(() => {
-        userInput.style.height = '28px';
-        inputBar.style.minHeight = '60px';
-      }, 10);
-      
+
       sendButton.disabled = true;
       showTyping();
-
       try {
         const response = await fetch('http://127.0.0.1:8000/ask', {
           method: 'POST',
@@ -1192,34 +1058,33 @@
             session_id: currentSessionId
           })
         });
-
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        
+
         const data = await response.json();
         hideTyping();
-        
+
         currentSessionId = data.session_id;
         const botResponse = data.answer || 'I apologize, but I couldn\'t generate a proper response. Please try asking again.';
-        
+
         setTimeout(() => {
           addMessage(botResponse, 'bot');
-          
+
           if (data.suggestions && data.suggestions.length > 0) {
             setTimeout(() => {
               updateSuggestions(data.suggestions);
             }, 300);
           }
         }, 500);
-        
+
         if (chatTitle.textContent === 'How can I help you learn today?') {
           const newTitle = data.meta?.session_title || (message.length > 30 ? message.substring(0, 30) + '...' : message);
           chatTitle.textContent = newTitle;
         }
-        
+
         setTimeout(() => {
           loadSessions();
         }, 1000);
-        
+
       } catch (error) {
         hideTyping();
         setTimeout(() => {
@@ -1231,12 +1096,11 @@
         userInput.focus();
       }
     });
-
     // Initialize app
     document.addEventListener('DOMContentLoaded', () => {
       loadSessions();
       userInput.focus();
-      
+
       setTimeout(() => {
         document.body.style.opacity = '1';
       }, 100);
