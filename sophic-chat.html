@@ -963,7 +963,7 @@
     // API functions
     async function loadSessions() {
       try {
-        const response = await fetch('http://127.0.0.1:8000/sessions');
+const response = await fetch('https://sophic-backend-fl4w.onrender.com/sessions');
         const data = await response.json();
         sessions = data.sessions;
         renderSessions();
@@ -1003,7 +1003,7 @@
     async function loadSession(sessionId) {
       try {
         currentSessionId = sessionId;
-        const response = await fetch(`http://127.0.0.1:8000/sessions/${sessionId}`);
+const response = await fetch(`https://sophic-backend-fl4w.onrender.com/sessions/${sessionId}`);
         const data = await response.json();
 
         chatTitle.textContent = data.title;
@@ -1050,7 +1050,7 @@
       sendButton.disabled = true;
       showTyping();
       try {
-        const response = await fetch('http://127.0.0.1:8000/ask', {
+const response = await fetch('https://sophic-backend-fl4w.onrender.com/ask', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1108,3 +1108,4 @@
   </script>
 </body>
 </html>
+
