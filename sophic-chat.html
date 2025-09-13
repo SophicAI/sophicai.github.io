@@ -733,6 +733,16 @@
       }
     }
   </style>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']]
+  }
+};
+</script>
 </head>
 <body>
   <!-- Enhanced Liquid Background -->
@@ -1128,5 +1138,6 @@ const response = await fetch('https://sophic-backend-fl4w.onrender.com/ask', {
 
 </body>
 </html>
+
 
 
