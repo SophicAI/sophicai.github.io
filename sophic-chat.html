@@ -744,10 +744,23 @@ window.MathJax = {
 </script>
 
 <!-- STEP 2: Library SECOND -->
-<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']],
+    processEscapes: true
+  },
+  startup: {
+    ready: () => {
+      console.log('MathJax ready!');
+      MathJax.startup.defaultReady();
+    }
+  }
+};
 </script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
 </head>
 <body>
   <!-- Enhanced Liquid Background -->
@@ -1084,6 +1097,12 @@ const response = await fetch('https://sophic-backend-fl4w.onrender.com/ask', {
         setTimeout(() => {
 addMessage(botResponse, 'bot');
 renderMath(); // Add this line right after
+setTimeout(() => {
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    MathJax.typesetPromise();
+  }
+}, 100);
+
 
 
           if (data.suggestions && data.suggestions.length > 0) {
@@ -1156,6 +1175,7 @@ window.renderMath = renderMath;
 </script>
 </body>
 </html>
+
 
 
 
