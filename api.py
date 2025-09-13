@@ -20,10 +20,10 @@ genai.configure(api_key=API_KEY)
 MODEL = os.getenv("MODEL", "gemini-1.5-flash")
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
 ALLOWED_ORIGINS = [o.strip() for o in os.getenv(
-ALLOWED_ORIGINS = [o.strip() for o in os.getenv(
     "ALLOWED_ORIGINS",
     "https://sophicai.github.io,http://127.0.0.1:5500,http://localhost:5500,http://localhost:3000"
 ).split(",") if o.strip()]
+
 
 
 app = FastAPI(title="Sophic AI Tutor")
@@ -372,4 +372,5 @@ def status():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
+
 
