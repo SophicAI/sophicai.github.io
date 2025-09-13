@@ -1136,15 +1136,20 @@ const response = await fetch('https://sophic-backend-fl4w.onrender.com/ask', {
   </div>
 </div>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+function renderMath() {
     if (window.MathJax) {
-        MathJax.typesetPromise();
+        MathJax.typesetPromise().catch(function (err) {
+            console.log('MathJax error: ' + err.message);
+        });
     }
-});
-</script>
+}
 
+// Call this after each AI response
+window.renderMath = renderMath;
+</script>
 </body>
 </html>
+
 
 
 
