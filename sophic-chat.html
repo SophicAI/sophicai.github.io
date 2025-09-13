@@ -1082,7 +1082,9 @@ const response = await fetch('https://sophic-backend-fl4w.onrender.com/ask', {
         const botResponse = data.answer || 'I apologize, but I couldn\'t generate a proper response. Please try asking again.';
 
         setTimeout(() => {
-          addMessage(botResponse, 'bot');
+addMessage(botResponse, 'bot');
+renderMath(); // Add this line right after
+
 
           if (data.suggestions && data.suggestions.length > 0) {
             setTimeout(() => {
@@ -1154,6 +1156,7 @@ window.renderMath = renderMath;
 </script>
 </body>
 </html>
+
 
 
 
