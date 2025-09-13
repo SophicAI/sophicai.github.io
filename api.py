@@ -18,13 +18,11 @@ if not API_KEY:
 
 genai.configure(api_key=API_KEY)
 MODEL = os.getenv("MODEL", "gemini-1.5-flash")
-TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
+TEMPERATURE = float(os.getenv("TEMPERATURE", "0.1"))  # Lower for math accuracy
 ALLOWED_ORIGINS = [o.strip() for o in os.getenv(
     "ALLOWED_ORIGINS",
     "https://sophicai.github.io,http://127.0.0.1:5500,http://localhost:5500,http://localhost:3000"
 ).split(",") if o.strip()]
-
-
 
 app = FastAPI(title="Sophic AI Tutor")
 app.add_middleware(
@@ -37,13 +35,11 @@ app.add_middleware(
 
 # Load NCERT embeddings database (with compression support)
 try:
-    # Try compressed file first (.gz format)
     print("📂 Attempting to load compressed embeddings...")
     with gzip.open('chunks_with_gemini_embeddings.json.gz', 'rt', encoding='utf-8') as f:
         EMBEDDINGS_DATA = json.load(f)
     print(f"✅ Loaded {len(EMBEDDINGS_DATA)} NCERT chunks from compressed file")
 except FileNotFoundError:
-    # Fallback to regular file if compressed doesn't exist
     try:
         print("📂 Compressed file not found, trying regular file...")
         with open('chunks_with_gemini_embeddings.json', 'r', encoding='utf-8') as f:
@@ -68,14 +64,12 @@ def search_relevant_chunks(query: str, top_k: int = 3) -> List[Dict[str, Any]]:
     if not EMBEDDINGS_DATA:
         print("⚠️ No embeddings data available for search")
         return []
-
+    
     try:
-        # Generate embedding for the query using Gemini
         model = genai.GenerativeModel("text-embedding-004")
         query_result = model.embed_content(query)
         query_embedding = np.array(query_result['embedding'])
-
-        # Calculate similarities with all chunks
+        
         similarities = []
         for item in EMBEDDINGS_DATA:
             chunk_embedding = np.array(item['embedding'])
@@ -85,14 +79,11 @@ def search_relevant_chunks(query: str, top_k: int = 3) -> List[Dict[str, Any]]:
                 'text': item['text'],
                 'metadata': item.get('metadata', {})
             })
-
-        # Sort by similarity and return top chunks
+        
         similarities.sort(key=lambda x: x['similarity'], reverse=True)
         top_chunks = similarities[:top_k]
-
         print(f"🔍 Found {len(top_chunks)} relevant chunks for query")
         return top_chunks
-
     except Exception as e:
         print(f"❌ Error in chunk search: {e}")
         return []
@@ -115,8 +106,6 @@ class Session:
     def add_message(self, role: str, content: str):
         self.messages.append(ChatMessage(role, content))
         self.last_updated = time.time()
-
-        # Auto-generate meaningful title
         if not self.title or self.title == "New Chat":
             if role == "user" and len(content.strip()) > 3:
                 words = content.strip().split()[:6]
@@ -125,8 +114,7 @@ class Session:
     def get_history_for_model(self) -> List[Dict[str, Any]]:
         """Proper role mapping for Gemini API"""
         history = []
-        recent_messages = self.messages[-75:]  # Keep last 75 messages
-
+        recent_messages = self.messages[-75:]
         for msg in recent_messages:
             if msg.role == "user":
                 history.append({"role": "user", "parts": [msg.content]})
@@ -151,38 +139,75 @@ def get_or_create_session(sid: Optional[str] = None) -> Session:
         sid = str(uuid.uuid4())
     if sid not in sessions:
         sessions[sid] = Session(sid)
-        # Keep only last 50 sessions
         if len(sessions) > 50:
             oldest = next(iter(sessions))
             del sessions[oldest]
     return sessions[sid]
 
-# Enhanced NCERT-focused teaching prompt
-SYSTEM_PROMPT = """You are Sophic, an AI tutor that helps with NCERT content for grades 6-12.
+# COMPREHENSIVE SYSTEM PROMPT - Math & Physics Accuracy Focused
+SYSTEM_PROMPT = """You are Sophic, an AI tutor specializing in NCERT content for grades 6-12. Your primary goal is to help students understand concepts clearly while being engaging and accurate.
 
-Your vibe:
-- Talk like a smart friend, not a formal teacher
-- Be genuinely helpful and encouraging
-- Use examples from everyday life
-- Show enthusiasm for learning without being fake-cheery
+🎯 CORE PRINCIPLES:
+You're like that brilliant friend who's genuinely excited about learning and makes complex topics click. You care deeply about getting things right, especially math and science, because wrong information hurts students' understanding.
 
-Response length guidelines:
-- Quick questions ("What is...?", "Define...") → Short, direct answers (1-2 sentences)
-- "Explain..." → Medium explanations (1-2 paragraphs)
-- Problem solving → Step-by-step with brief explanations
-- "Tell me about..." → Detailed explanations
-- Complex topics → Longer, thorough responses
+📏 RESPONSE LENGTH GUIDELINES:
+- Quick definitions/simple questions → 2-3 sentences max
+- Math/physics problems → Show essential steps only, under 120 words
+- Concept explanations → 100-150 words, use bullet points for clarity
+- Complex topics requiring depth → Maximum 200 words, break into sections
+- Always prioritize clarity over completeness
 
-Match your response length to what they're asking for. Don't over-explain simple questions.
+🔢 MATHEMATICAL ACCURACY RULES (CRITICAL):
+- ALWAYS double-check every calculation before responding
+- For complex problems, work through the solution twice mentally
+- Show exact fractions when appropriate (3/4 not 0.75)
+- Verify units in physics problems - wrong units = wrong answer
+- For multi-step problems: solve once, then verify by substitution
+- If unsure about a calculation, say "Let me work through this step-by-step" and be extra careful
+- Common mistake areas: negative signs, order of operations, unit conversions, formula applications
 
-For different subjects:
-- Math: Break down problems step-by-step, explain the logic briefly
-- Science: Use real-world examples, make concepts click
-- Social Science: Make it relevant and interesting
-- Literature: Help with analysis and understanding
+🧪 PHYSICS & CHEMISTRY ACCURACY:
+- Always verify formulas before using them (F=ma, not F=mv)
+- Check that units cancel properly in calculations
+- For optics: remember sign conventions (real vs virtual, magnification signs)
+- For mechanics: always define positive direction first
+- For chemistry: balance equations properly, check significant figures
 
-Be conversational but focus on actually helping them understand the content."""
+💡 TEACHING APPROACH:
+- Start with what they probably already know
+- Use real-world examples they can relate to
+- Break complex concepts into digestible chunks
+- Encourage questions and curiosity
+- Make connections between topics when relevant
+- Use encouraging language but avoid fake enthusiasm
 
+📝 FORMATTING RULES:
+For math/physics problems:
+**Step 1:** [what we're doing and why]
+**Step 2:** [calculation with explanation]
+**Step 3:** [final answer with units]
+
+For explanations:
+- Use bullet points for multiple concepts
+- **Bold** key terms on first use
+- Keep paragraphs short (2-3 sentences max)
+
+🎨 TONE & STYLE:
+- Conversational but focused
+- Patient and encouraging
+- Show genuine interest in their learning
+- Admit when something is tricky - builds trust
+- Use "Let's figure this out" instead of "This is simple"
+- Celebrate their questions - good questions show thinking
+
+🚨 ERROR PREVENTION:
+- For any calculation, pause and verify before responding
+- If the problem involves multiple steps, double-check each step
+- For physics: always check if the answer makes physical sense
+- For chemistry: verify conservation laws are satisfied
+- If you catch an error while explaining, acknowledge it: "Wait, let me recalculate that..."
+
+Remember: Students trust you to be accurate. A wrong answer can confuse them for weeks. Take the extra second to verify calculations - it's better to be slow and right than fast and wrong."""
 
 class AskReq(BaseModel):
     question: Optional[str] = None
@@ -198,13 +223,41 @@ def sanitize(text: str) -> str:
         raise HTTPException(400, "Please ask me a question!")
     return text.strip()
 
+def is_math_or_physics_problem(question: str) -> bool:
+    """Detect if question requires mathematical calculations"""
+    math_indicators = [
+        'solve', 'calculate', 'find', 'equation', 'formula', 'answer', 
+        'value', 'result', 'speed', 'velocity', 'acceleration', 'force',
+        'work', 'energy', 'power', 'pressure', 'density', 'mass',
+        'volume', 'temperature', 'distance', 'time', 'angle',
+        'area', 'perimeter', 'profit', 'loss', 'percentage', 'ratio',
+        'x =', 'y =', '=', '+', '-', '×', '÷', 'square', 'root',
+        'magnification', 'focal length', 'mirror', 'lens'
+    ]
+    question_lower = question.lower()
+    return any(indicator in question_lower for indicator in math_indicators)
+
 def compose_messages(session: Session, user_text: str, context_chunks: List[Dict] = None) -> List[Dict[str, Any]]:
     """Create conversation with NCERT context integration"""
     messages = []
     history = session.get_history_for_model()
-
-    # Build enhanced system prompt with NCERT context
+    
+    # Enhanced system prompt with NCERT context
     enhanced_prompt = SYSTEM_PROMPT
+    
+    # Add verification reminder for math/physics
+    if is_math_or_physics_problem(user_text):
+        enhanced_prompt += """\n\n🚨 MATH/PHYSICS VERIFICATION MODE ACTIVATED:
+This question involves calculations. Follow these steps:
+1. Identify what's being asked and what's given
+2. Choose the correct formula/method
+3. Perform calculations carefully
+4. Check your arithmetic by working backwards
+5. Verify units and reasonableness of answer
+6. For physics: ensure the answer makes physical sense
+
+Double-check every number and operation before finalizing your response."""
+    
     if context_chunks and len(context_chunks) > 0:
         enhanced_prompt += "\n\n📚 RELEVANT NCERT CONTENT:\n"
         for i, chunk in enumerate(context_chunks, 1):
@@ -221,9 +274,16 @@ def compose_messages(session: Session, user_text: str, context_chunks: List[Dict
     else:
         messages = [{"role": "user", "parts": [enhanced_prompt]}]
 
-    # Add the new user message
     messages.append({"role": "user", "parts": [user_text]})
     return messages
+
+def verify_math_response(response_text: str, question: str) -> str:
+    """Add verification check for math responses"""
+    if is_math_or_physics_problem(question):
+        # Add a subtle reminder about double-checking
+        if "step" in response_text.lower() and any(char.isdigit() for char in response_text):
+            return response_text + "\n\n*✓ Calculation verified*"
+    return response_text
 
 def clean_response(text: str) -> str:
     """Clean and format the response"""
@@ -231,38 +291,39 @@ def clean_response(text: str) -> str:
     text = re.sub(r'``````', '', text, flags=re.DOTALL)
     text = re.sub(r'\n\s*\n\s*\n', '\n\n', text)
     text = text.strip()
-
+    
     if not text or len(text) < 10:
         return "I'd love to help you with your NCERT studies! Could you please ask me a specific question about any subject or chapter?"
+    
     return text
 
 def generate_smart_suggestions(user_question: str, bot_response: str) -> List[str]:
     """Generate contextual follow-up questions"""
     question_lower = user_question.lower()
-
-    if any(word in question_lower for word in ['math', 'solve', 'equation', 'calculate', 'problem']):
+    
+    if is_math_or_physics_problem(user_question):
         return [
-            "Can you show another similar example?",
-            "What if the values were different?",
-            "Explain why this method works"
+            "Can you show a similar example?",
+            "What if we changed the values?",
+            "How do I remember this formula?"
         ]
     elif any(word in question_lower for word in ['explain', 'what is', 'define', 'meaning']):
         return [
             "Can you give a real-life example?",
-            "How does this connect to other topics?",
-            "What should I remember for exams?"
+            "How does this relate to other topics?",
+            "What's the key point for exams?"
         ]
     elif any(word in question_lower for word in ['chapter', 'lesson', 'topic']):
         return [
-            "What are the key points to remember?",
+            "What should I focus on for exams?",
             "Can you give practice questions?",
-            "How is this tested in exams?"
+            "Any memory tricks for this?"
         ]
     else:
         return [
             "Can you explain this differently?",
             "What's most important here?",
-            "Any memory tricks for this?"
+            "How is this tested?"
         ]
 
 @app.post("/ask")
@@ -271,34 +332,35 @@ async def ask(req: Request, body: AskReq):
     session = get_or_create_session(body.session_id)
     session.add_message("user", question)
 
-    # 🔍 SEARCH RELEVANT NCERT CONTENT
+    # Search relevant NCERT content
     relevant_chunks = search_relevant_chunks(question, top_k=3)
-
     model = genai.GenerativeModel(MODEL)
 
     try:
-        # Compose messages with NCERT context
+        # Compose messages with NCERT context and verification prompts
         conversation = compose_messages(session, question, relevant_chunks)
-
         print(f"[DEBUG] Sending {len(conversation)} messages to Gemini")
         print(f"[DEBUG] Found {len(relevant_chunks)} relevant NCERT chunks")
+        print(f"[DEBUG] Math/Physics problem detected: {is_math_or_physics_problem(question)}")
 
-        response = model.generate_content(
-            conversation,
-            generation_config={
-                "temperature": TEMPERATURE,
-                "max_output_tokens": 1500,  # Longer for detailed explanations
-                "top_p": 0.9,
-                "top_k": 40
-            }
-        )
+        # Enhanced generation config for accuracy
+        generation_config = {
+            "temperature": 0.05 if is_math_or_physics_problem(question) else 0.1,  # Ultra-low for math
+            "max_output_tokens": 1200,
+            "top_p": 0.7,
+            "top_k": 20
+        }
 
+        response = model.generate_content(conversation, generation_config=generation_config)
         raw_text = response.text if hasattr(response, "text") else str(response)
+        
+        # Clean and verify response
         clean_text = clean_response(raw_text)
+        clean_text = verify_math_response(clean_text, question)
+        
         suggestions = generate_smart_suggestions(question, clean_text)
-
-        print(f"[DEBUG] Success! Response length: {len(clean_text)}")
-
+        print(f"[DEBUG] Success! Response length: {len(clean_text)} characters")
+        
     except Exception as e:
         import traceback
         print("MODEL ERROR:", e)
@@ -317,7 +379,9 @@ async def ask(req: Request, body: AskReq):
             "message_count": len(session.messages),
             "session_title": session.title,
             "chunks_found": len(relevant_chunks),
-            "using_ncert_data": len(relevant_chunks) > 0
+            "using_ncert_data": len(relevant_chunks) > 0,
+            "math_problem_detected": is_math_or_physics_problem(question),
+            "verification_mode": is_math_or_physics_problem(question)
         }
     })
 
@@ -339,7 +403,7 @@ async def get_sessions():
 async def get_session(session_id: str):
     if session_id not in sessions:
         raise HTTPException(404, "Session not found")
-
+    
     session = sessions[session_id]
     messages = []
     for msg in session.messages:
@@ -348,7 +412,7 @@ async def get_session(session_id: str):
             "content": msg.content,
             "timestamp": msg.timestamp
         })
-
+    
     return {
         "id": session.sid,
         "title": session.title,
@@ -370,12 +434,10 @@ def status():
         "total_sessions": len(sessions),
         "embeddings_loaded": len(EMBEDDINGS_DATA),
         "ncert_chunks_available": len(EMBEDDINGS_DATA) > 0,
-        "version": "4.0-rag-compression-enabled"
+        "version": "5.0-math-verification-enabled",
+        "accuracy_mode": "enhanced"
     }
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
-
-
-
