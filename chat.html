@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Sophic AI - Your Personal Tutor</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
@@ -26,8 +26,12 @@
       --user-bg: linear-gradient(135deg, rgba(34, 229, 122, 0.15), rgba(0, 200, 255, 0.1));
       --bot-bg: linear-gradient(135deg, rgba(15, 20, 35, 0.9), rgba(25, 30, 45, 0.8));
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
     html, body { 
       height: 100%; 
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -36,7 +40,22 @@
       overflow: hidden;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
+    
+    /* Allow text selection for messages and inputs */
+    .msg, #userInput, .suggestion { 
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
+    }
+
     /* ENHANCED LIQUID BACKGROUND */
     #liquid-stage { 
       position: fixed; 
@@ -44,7 +63,6 @@
       z-index: -2; 
       overflow: hidden;
     }
-
     #liquid-canvas { 
       width: 100vw; 
       height: 100vh; 
@@ -56,6 +74,7 @@
       0%, 100% { opacity: 0.9; }
       50% { opacity: 1; }
     }
+    
     /* FLOATING PARTICLES */
     #particles { 
       position: fixed; 
@@ -63,7 +82,6 @@
       z-index: -1; 
       pointer-events: none; 
     }
-
     .particle { 
       position: absolute; 
       width: 3px; 
@@ -73,7 +91,6 @@
       box-shadow: 0 0 12px var(--accent-glow);
       animation: float 25s linear infinite;
     }
-
     @keyframes float { 
       0% { transform: translateY(110vh) translateX(0) rotate(0deg); opacity: 0; } 
       10% { opacity: 1; }
@@ -81,6 +98,98 @@
       90% { opacity: 1; }
       100% { transform: translateY(-10vh) translateX(-20px) rotate(360deg); opacity: 0; } 
     }
+
+    /* MOBILE MENU BUTTON */
+    .mobile-menu-toggle {
+      display: none;
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1001;
+      width: 44px;
+      height: 44px;
+      background: var(--glass-strong);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      backdrop-filter: blur(20px);
+      transition: all 0.3s ease;
+    }
+    .mobile-menu-toggle:active {
+      transform: scale(0.95);
+    }
+    .mobile-menu-toggle span {
+      width: 20px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 1px;
+      transition: all 0.3s ease;
+    }
+    .mobile-menu-toggle.active span:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+    .mobile-menu-toggle.active span:nth-child(2) {
+      opacity: 0;
+    }
+    .mobile-menu-toggle.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(7px, -6px);
+    }
+
+    /* MOBILE OVERLAY */
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(4px);
+    }
+    .sidebar-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* BUILT BY BADGE - DESKTOP ONLY */
+    .built-by-badge {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 1000;
+      display: none; /* Hidden by default, shown via JS on desktop */
+    }
+    .built-by-content {
+      padding: 10px 16px;
+      background: var(--glass-strong);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      font-weight: 500;
+      box-shadow: var(--shadow);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      white-space: nowrap;
+    }
+    .built-by-content:hover {
+      background: rgba(34, 229, 122, 0.1);
+      border-color: var(--accent-glow);
+      color: var(--text);
+      transform: translateY(-2px);
+    }
+    .built-by-accent {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
     /* MAIN LAYOUT - FIXED GRID */
     .app { 
       display: grid; 
@@ -90,6 +199,7 @@
       position: fixed;
       inset: 0;
     }
+
     /* ENHANCED SIDEBAR */
     .sidebar {
       background: var(--glass-strong);
@@ -100,6 +210,7 @@
       animation: slideInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
       overflow: hidden;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .sidebar::before {
       content: '';
@@ -158,12 +269,14 @@
       font-size: 18px;
       font-weight: 600;
     }
-
     .new-chat:hover {
       background: var(--accent);
       color: #000;
       transform: scale(1.1) rotate(90deg);
       box-shadow: 0 8px 25px var(--accent-glow);
+    }
+    .new-chat:active {
+      transform: scale(1.05) rotate(90deg);
     }
     .sessions {
       flex: 1;
@@ -207,6 +320,9 @@
       transform: translateX(6px);
       box-shadow: var(--shadow);
     }
+    .session:active {
+      transform: translateX(4px) scale(0.98);
+    }
     .session.active {
       background: rgba(34, 229, 122, 0.1);
       border-color: var(--accent-glow);
@@ -234,6 +350,7 @@
       position: relative;
       z-index: 1;
     }
+
     /* ENHANCED MAIN PANEL - FIXED LAYOUT */
     .main {
       display: flex;
@@ -288,6 +405,7 @@
       box-shadow: 0 0 12px var(--accent-glow);
       animation: pulse 2s infinite;
     }
+
     /* ENHANCED WELCOME STATE */
     .welcome-state {
       flex: 1;
@@ -368,6 +486,9 @@
       transform: translateY(-8px);
       box-shadow: var(--shadow-strong);
     }
+    .card:active {
+      transform: translateY(-4px) scale(0.98);
+    }
     .card-icon {
       width: 48px;
       height: 48px;
@@ -429,13 +550,17 @@
       color: var(--text);
       transform: translateY(-2px);
     }
+    .tab:active {
+      transform: scale(1.02);
+    }
+
     /* ENHANCED CHAT STATE - FIXED LAYOUT */
     .chat-state {
       flex: 1;
       display: none;
       flex-direction: column;
       animation: fadeIn 0.6s ease;
-      min-height: 0; /* KEY FIX: Allow flexbox to shrink */
+      min-height: 0;
       overflow: hidden;
     }
     .chat-state.active {
@@ -445,6 +570,7 @@
       0% { opacity: 0; }
       100% { opacity: 1; }
     }
+
     /* FIXED MESSAGES CONTAINER */
     .messages {
       flex: 1;
@@ -455,7 +581,8 @@
       flex-direction: column;
       gap: 20px;
       position: relative;
-      min-height: 0; /* KEY FIX: Allow container to shrink */
+      min-height: 0;
+      -webkit-overflow-scrolling: touch;
     }
     .messages::before,
     .messages::after {
@@ -494,7 +621,9 @@
       transition: all 0.3s ease;
       animation: messageSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
       line-height: 1.6;
-      flex-shrink: 0; /* Prevent messages from shrinking */
+      flex-shrink: 0;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
     @keyframes messageSlideIn { 
       0% { 
@@ -534,6 +663,7 @@
       align-self: flex-start;
       background: var(--bot-bg);
     }
+
     /* ENHANCED SUGGESTIONS */
     .suggestions {
       padding: 0 32px 20px;
@@ -561,6 +691,10 @@
       transform: translateY(-3px) scale(1.05);
       box-shadow: 0 8px 25px var(--accent-glow);
     }
+    .suggestion:active {
+      transform: translateY(-1px) scale(1.02);
+    }
+
     /* FIXED INPUT - ALWAYS VISIBLE AND POSITIONED */
     .input {
       padding: 24px 32px;
@@ -651,6 +785,7 @@
       transform: none;
       box-shadow: none;
     }
+
     /* ENHANCED TYPING INDICATOR */
     .typing {
       display: inline-flex;
@@ -683,6 +818,7 @@
         opacity: 1;
       }
     }
+
     /* ENHANCED ANIMATIONS */
     @keyframes slideInLeft {
       0% { transform: translateX(-100%); opacity: 0; }
@@ -692,85 +828,299 @@
       0% { transform: translateX(100%); opacity: 0; }
       100% { transform: translateX(0); opacity: 1; }
     }
-    /* RESPONSIVE DESIGN */
-    @media (max-width: 768px) {
-      .app { 
-        grid-template-columns: 1fr; 
-        grid-template-rows: auto 1fr;
-      }
 
-      .sidebar { 
-        display: none; 
+    /* MOBILE & TABLET RESPONSIVE DESIGN */
+    @media (max-width: 1024px) {
+      .mobile-menu-toggle {
+        display: flex;
       }
-
-      .starter-cards { 
-        grid-template-columns: 1fr; 
-        gap: 16px;
+      
+      .app {
+        grid-template-columns: 1fr;
       }
-
-      .msg { 
-        max-width: 90%; 
+      
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 320px;
+        height: 100vh;
+        z-index: 1000;
+        transform: translateX(-100%);
       }
-      .welcome-state h1 {
-        font-size: 2.2rem;
+      
+      .sidebar.open {
+        transform: translateX(0);
+        box-shadow: 4px 0 20px rgba(0,0,0,0.5);
       }
+      
+      .main {
+        grid-column: 1;
+      }
+      
+      .header {
+        padding: 20px 24px;
+        padding-left: 80px;
+      }
+      
+      .title {
+        font-size: 1.1rem;
+      }
+      
       .messages {
-        padding: 20px;
+        padding: 24px;
       }
+      
       .input {
-        padding: 16px 20px;
+        padding: 20px 24px;
+      }
+      
+      /* Reduce background effects for performance */
+      #liquid-canvas {
+        filter: blur(40px) saturate(120%);
       }
     }
-    @media (max-width: 480px) {
+
+    @media (max-width: 768px) {
+      .mobile-menu-toggle {
+        top: 16px;
+        left: 16px;
+        width: 48px;
+        height: 48px;
+      }
+      
+      .sidebar {
+        width: 300px;
+      }
+      
+      .header {
+        padding: 16px 20px;
+        padding-left: 76px;
+      }
+      
+      .title {
+        font-size: 1rem;
+      }
+      
+      .status {
+        font-size: 0.8rem;
+      }
+      
       .welcome-state {
         padding: 32px 20px;
       }
+      
       .welcome-state h1 {
-        font-size: 1.8rem;
+        font-size: 2.5rem;
       }
+      
+      .welcome-state p {
+        font-size: 1rem;
+        margin-bottom: 32px;
+      }
+      
+      .starter-cards {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+      
+      .card {
+        padding: 24px 20px;
+      }
+      
+      .card h3 {
+        font-size: 1rem;
+      }
+      
+      .card p {
+        font-size: 0.9rem;
+      }
+      
+      .messages {
+        padding: 16px;
+        gap: 16px;
+      }
+      
+      .msg {
+        max-width: 85%;
+        padding: 16px 20px;
+        font-size: 0.95rem;
+      }
+      
+      .suggestions {
+        padding: 0 16px 16px;
+        gap: 8px;
+      }
+      
+      .suggestion {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+      }
+      
+      .input {
+        padding: 16px;
+      }
+      
+      .input-bar {
+        padding: 14px 16px;
+        gap: 12px;
+        min-height: 56px;
+      }
+      
+      #sendButton {
+        width: 44px;
+        height: 44px;
+        font-size: 16px;
+      }
+      
+      #userInput {
+        font-size: 16px; /* Prevents zoom on iOS */
+        -webkit-appearance: none;
+      }
+      
+      /* Disable particles on mobile for performance */
+      .particle {
+        display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .mobile-menu-toggle {
+        width: 44px;
+        height: 44px;
+        top: 14px;
+        left: 14px;
+      }
+      
+      .sidebar {
+        width: 280px;
+      }
+      
+      .header {
+        padding: 14px 16px;
+        padding-left: 70px;
+      }
+      
+      .title {
+        font-size: 0.95rem;
+      }
+      
+      .status {
+        display: none;
+      }
+      
+      .welcome-state {
+        padding: 24px 16px;
+      }
+      
+      .welcome-state h1 {
+        font-size: 2rem;
+      }
+      
+      .welcome-state p {
+        font-size: 0.95rem;
+      }
+      
       .card {
         padding: 20px 16px;
       }
+      
+      .messages {
+        padding: 12px;
+      }
+      
+      .msg {
+        max-width: 90%;
+        padding: 14px 16px;
+        font-size: 0.9rem;
+      }
+      
+      .input {
+        padding: 12px;
+      }
+      
+      .input-bar {
+        padding: 12px 14px;
+        min-height: 52px;
+      }
+      
+      #sendButton {
+        width: 40px;
+        height: 40px;
+      }
+    }
+
+    /* PWA-like enhancements */
+    @media (max-width: 768px) {
+      .card:hover {
+        transform: translateY(-4px);
+      }
+      
+      .msg:hover {
+        transform: translateY(-1px);
+      }
+      
+      .suggestion:hover {
+        transform: translateY(-2px) scale(1.02);
+      }
+      
+      /* Better touch targets */
+      .session {
+        min-height: 60px;
+        padding: 18px 16px;
+      }
+      
+      .new-chat {
+        width: 44px;
+        height: 44px;
+      }
     }
   </style>
-<!-- STEP 1: Configuration FIRST -->
-<script>
-window.MathJax = {
-  tex: {
-    inlineMath: [['$', '$'], ['\\(', '\\)']],
-    displayMath: [['$$', '$$'], ['\\[', '\\]']]
-  }
-};
-</script>
 
-<!-- STEP 2: Library SECOND -->
-<script>
-window.MathJax = {
-  tex: {
-    inlineMath: [['$', '$']],
-    displayMath: [['$$', '$$']],
-    processEscapes: true
-  },
-  startup: {
-    ready: () => {
-      console.log('MathJax ready!');
-      MathJax.startup.defaultReady();
+  <!-- MathJax Configuration -->
+  <script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$']],
+      displayMath: [['$$', '$$']],
+      processEscapes: true
+    },
+    startup: {
+      ready: () => {
+        console.log('MathJax ready!');
+        MathJax.startup.defaultReady();
+      }
     }
-  }
-};
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
+  };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
+  <!-- Mobile Menu Button -->
+  <button class="mobile-menu-toggle" id="mobileMenuToggle">
+    <span></span><span></span><span></span>
+  </button>
+
+  <!-- Mobile Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Built by Badge - Desktop Only -->
+  <div class="built-by-badge" id="builtByBadge">
+    <div class="built-by-content">
+      Built by <span class="built-by-accent">Grishiv Sai K</span>
+    </div>
+  </div>
+
   <!-- Enhanced Liquid Background -->
   <div id="liquid-stage">
     <canvas id="liquid-canvas"></canvas>
   </div>
   <div id="particles"></div>
+
   <div class="app">
     <!-- Enhanced Sidebar -->
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="logo">
           <div class="logo-dot"></div>
@@ -782,6 +1132,7 @@ window.MathJax = {
         <!-- Sessions populated dynamically -->
       </div>
     </div>
+
     <!-- Enhanced Main Panel -->
     <div class="main">
       <div class="header">
@@ -791,6 +1142,7 @@ window.MathJax = {
           Online
         </div>
       </div>
+
       <!-- Enhanced Welcome State -->
       <div class="welcome-state" id="welcomeState">
         <h1>How can I help you learn today?</h1>
@@ -812,273 +1164,87 @@ window.MathJax = {
             <p>Deep analysis of texts, themes, and literary techniques</p>
           </div>
         </div>
-        <div class="tab-bar">
-                  </div>
+        <div class="tab-bar"></div>
       </div>
+
       <!-- Enhanced Chat State -->
       <div class="chat-state" id="chatState">
         <div class="messages" id="messages"></div>
         <div class="suggestions" id="suggestions"></div>
       </div>
+
       <!-- FIXED Input - Always visible -->
       <div class="input">
-        <form class="input-bar" id="chatForm">
+        <div class="input-bar" id="inputBar">
           <textarea id="userInput" placeholder="Ask me anything about your studies..." rows="1"></textarea>
-          <button type="submit" id="sendButton">↗</button>
-        </form>
+          <button type="button" id="sendButton">↗</button>
+        </div>
       </div>
     </div>
   </div>
+
   <script>
     // Global state
     let currentSessionId = null;
     let sessions = [];
+    
     // DOM references
     const welcomeState = document.getElementById('welcomeState');
     const chatState = document.getElementById('chatState');
     const messages = document.getElementById('messages');
     const userInput = document.getElementById('userInput');
     const sendButton = document.getElementById('sendButton');
-    const chatForm = document.getElementById('chatForm');
+    const inputBar = document.getElementById('inputBar');
     const sessionsList = document.getElementById('sessionsList');
     const chatTitle = document.getElementById('chatTitle');
     const suggestions = document.getElementById('suggestions');
-    // Enhanced liquid background
-    (() => {
-      const canvas = document.getElementById('liquid-canvas');
-      const ctx = canvas.getContext('2d');
-      let animationId;
-      function resizeCanvas() {
-        canvas.width = window.innerWidth * window.devicePixelRatio;
-        canvas.height = window.innerHeight * window.devicePixelRatio;
-        canvas.style.width = window.innerWidth + 'px';
-        canvas.style.height = window.innerHeight + 'px';
-        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-      }
-      const orbs = Array.from({ length: 15 }, () => ({
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-        radius: Math.random() * 150 + 80,
-        vx: (Math.random() - 0.5) * 1.2,
-        vy: (Math.random() - 0.5) * 1.2,
-        hue: Math.random() * 80 + 100,
-        opacity: Math.random() * 0.4 + 0.2,
-        pulseSpeed: Math.random() * 0.02 + 0.01
-      }));
-      let time = 0;
-      function animate() {
-        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-        time += 0.016;
 
-        orbs.forEach((orb, i) => {
-          orb.x += orb.vx;
-          orb.y += orb.vy;
-          if (orb.x < -orb.radius || orb.x > window.innerWidth + orb.radius) orb.vx *= -1;
-          if (orb.y < -orb.radius || orb.y > window.innerHeight + orb.radius) orb.vy *= -1;
-          const pulse = Math.sin(time * orb.pulseSpeed) * 0.3 + 1;
-          const currentRadius = orb.radius * pulse;
-          const currentOpacity = orb.opacity * pulse;
-          const gradient = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, currentRadius);
-          gradient.addColorStop(0, `hsla(${orb.hue}, 90%, 70%, ${currentOpacity})`);
-          gradient.addColorStop(0.4, `hsla(${orb.hue}, 80%, 60%, ${currentOpacity * 0.6})`);
-          gradient.addColorStop(1, 'hsla(0, 0%, 0%, 0)');
-          ctx.fillStyle = gradient;
-          ctx.beginPath();
-          ctx.arc(orb.x, orb.y, currentRadius, 0, Math.PI * 2);
-          ctx.fill();
-        });
-        animationId = requestAnimationFrame(animate);
-      }
-      resizeCanvas();
-      animate();
-      window.addEventListener('resize', resizeCanvas);
-    })();
-    // Enhanced floating particles
-    (() => {
-      const host = document.getElementById('particles');
-      function spawnParticle() {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.left = Math.random() * 100 + 'vw';
-        particle.style.animationDuration = (Math.random() * 10 + 20) + 's';
-        particle.style.animationDelay = (Math.random() * 8) + 's';
-        particle.style.width = particle.style.height = (Math.random() * 4 + 2) + 'px';
-        host.appendChild(particle);
-        setTimeout(() => particle.remove(), 35000);
-      }
+    // Mobile menu elements
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const builtByBadge = document.getElementById('builtByBadge');
 
-      for (let i = 0; i < 40; i++) spawnParticle();
-      setInterval(spawnParticle, 800);
-    })();
+    // Badge visibility control - only show on desktop
+    function updateBadgeVisibility() {
+      if (builtByBadge) {
+        builtByBadge.style.display = window.innerWidth > 768 ? 'block' : 'none';
+      }
+    }
+    
+    updateBadgeVisibility();
+    window.addEventListener('resize', updateBadgeVisibility);
 
-    // BULLETPROOF: Input resize
-    userInput.addEventListener('input', function() {
-      this.style.height = '28px';
-      this.style.height = Math.max(28, Math.min(this.scrollHeight, 120)) + 'px';
+    // Mobile menu functionality
+    mobileMenuToggle?.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      mobileMenuToggle.classList.toggle('active');
+      sidebarOverlay.classList.toggle('active');
     });
 
-    // Enter to send
-    userInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        if (!sendButton.disabled && userInput.value.trim()) {
-          chatForm.dispatchEvent(new Event('submit'));
-        }
-      }
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      mobileMenuToggle.classList.remove('active');
+      sidebarOverlay.classList.remove('active');
     });
-    // State management
-    function showChatState() {
-      welcomeState.style.display = 'none';
-      chatState.classList.add('active');
-    }
-    function showWelcomeState() {
-      welcomeState.style.display = 'flex';
-      chatState.classList.remove('active');
-      chatTitle.textContent = 'How can I help you learn today?';
-    }
-    function addMessage(text, who) {
-      showChatState();
-      const div = document.createElement('div');
-      div.className = `msg ${who}`;
 
-      if (who === 'bot') {
-        div.innerHTML = marked.parse(String(text || ''));
-      } else {
-        div.textContent = String(text || '');
-      }
-
-      messages.appendChild(div);
-
-      // FIXED: Always scroll to bottom properly
-      requestAnimationFrame(() => {
-        messages.scrollTop = messages.scrollHeight;
-      });
-    }
-    function showTyping() {
-      const typing = document.createElement('div');
-      typing.className = 'typing';
-      typing.id = 'typing';
-      typing.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
-      messages.appendChild(typing);
-
-      // FIXED: Scroll to bottom when showing typing
-      requestAnimationFrame(() => {
-        messages.scrollTop = messages.scrollHeight;
-      });
-    }
-    function hideTyping() {
-      const typing = document.getElementById('typing');
-      if (typing) typing.remove();
-    }
-    function updateSuggestions(suggestionsList) {
-      suggestions.innerHTML = '';
-      if (!Array.isArray(suggestionsList) || suggestionsList.length === 0) return;
-
-      suggestionsList.forEach((suggestion, index) => {
-        const chip = document.createElement('div');
-        chip.className = 'suggestion';
-        chip.textContent = suggestion;
-        chip.style.animationDelay = (index * 0.1) + 's';
-        chip.addEventListener('click', () => {
-          userInput.value = suggestion;
-          userInput.focus();
-          userInput.style.height = '28px';
-          userInput.style.height = Math.max(28, Math.min(userInput.scrollHeight, 120)) + 'px';
-        });
-        suggestions.appendChild(chip);
-      });
-    }
-    // API functions
-    async function loadSessions() {
-      try {
-const response = await fetch('https://sophic-backend-fl4w.onrender.com/sessions');
-        const data = await response.json();
-        sessions = data.sessions;
-        renderSessions();
-      } catch (error) {
-        console.error('Failed to load sessions:', error);
-      }
-    }
-    function renderSessions() {
-      sessionsList.innerHTML = '';
-
-      if (sessions.length === 0) {
-        const emptyState = document.createElement('div');
-        emptyState.className = 'session';
-        emptyState.innerHTML = `
-          <div class="session-title">No conversations yet</div>
-          <div class="session-preview">Start chatting to see your history</div>
-        `;
-        emptyState.style.opacity = '0.6';
-        emptyState.style.cursor = 'default';
-        sessionsList.appendChild(emptyState);
-        return;
-      }
-      sessions.forEach((session, index) => {
-        const sessionDiv = document.createElement('div');
-        sessionDiv.className = `session ${session.id === currentSessionId ? 'active' : ''}`;
-        sessionDiv.style.animationDelay = (index * 0.05) + 's';
-        sessionDiv.onclick = () => loadSession(session.id);
-
-        sessionDiv.innerHTML = `
-          <div class="session-title">${session.title}</div>
-          <div class="session-preview">${session.preview || `${session.message_count} messages`}</div>
-        `;
-
-        sessionsList.appendChild(sessionDiv);
-      });
-    }
-    async function loadSession(sessionId) {
-      try {
-        currentSessionId = sessionId;
-const response = await fetch(`https://sophic-backend-fl4w.onrender.com/sessions/${sessionId}`);
-        const data = await response.json();
-
-        chatTitle.textContent = data.title;
-        messages.innerHTML = '';
-        showChatState();
-
-        data.messages.forEach((msg, index) => {
-          setTimeout(() => {
-            addMessage(msg.content, msg.role === 'assistant' ? 'bot' : msg.role);
-          }, index * 150);
-        });
-
-        renderSessions();
-      } catch (error) {
-        console.error('Failed to load session:', error);
-      }
-    }
-    function startNewChat() {
-      currentSessionId = null;
-      messages.innerHTML = '';
-      suggestions.innerHTML = '';
-      showWelcomeState();
-      renderSessions();
-      userInput.focus();
-    }
-    function askQuestion(question) {
-      userInput.value = question;
-      userInput.style.height = '28px';
-      userInput.style.height = Math.max(28, Math.min(userInput.scrollHeight, 120)) + 'px';
-      chatForm.dispatchEvent(new Event('submit'));
-    }
-    // FIXED form submission
-    chatForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
+    // BULLETPROOF message handling function
+    async function handleFormSubmit() {
       const message = userInput.value.trim();
       if (!message || sendButton.disabled) return;
-      addMessage(message, 'user');
 
-      // FIXED RESET - Simple and reliable
+      console.log('Sending message:', message); // Debug log
+
+      addMessage(message, 'user');
+      
+      // Reset input
       userInput.value = '';
       userInput.style.height = '28px';
-
       sendButton.disabled = true;
       showTyping();
+
       try {
-const response = await fetch('https://sophic-backend-fl4w.onrender.com/ask', {
+        const response = await fetch('https://sophic-backend-fl4w.onrender.com/ask', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1086,25 +1252,25 @@ const response = await fetch('https://sophic-backend-fl4w.onrender.com/ask', {
             session_id: currentSessionId
           })
         });
+        
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
+        
         const data = await response.json();
         hideTyping();
-
         currentSessionId = data.session_id;
+        
         const botResponse = data.answer || 'I apologize, but I couldn\'t generate a proper response. Please try asking again.';
-
+        
         setTimeout(() => {
-addMessage(botResponse, 'bot');
-renderMath(); // Add this line right after
-setTimeout(() => {
-  if (window.MathJax && window.MathJax.typesetPromise) {
-    MathJax.typesetPromise();
-  }
-}, 100);
-
-
-
+          addMessage(botResponse, 'bot');
+          
+          // Render math
+          setTimeout(() => {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+              MathJax.typesetPromise();
+            }
+          }, 100);
+          
           if (data.suggestions && data.suggestions.length > 0) {
             setTimeout(() => {
               updateSuggestions(data.suggestions);
@@ -1120,7 +1286,7 @@ setTimeout(() => {
         setTimeout(() => {
           loadSessions();
         }, 1000);
-
+        
       } catch (error) {
         hideTyping();
         setTimeout(() => {
@@ -1131,55 +1297,306 @@ setTimeout(() => {
         sendButton.disabled = false;
         userInput.focus();
       }
+    }
+
+    // DIRECT send button click handler - BULLETPROOF
+    sendButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('Send button clicked!'); // Debug log
+      handleFormSubmit();
     });
+
+    // Enter key handler
+    userInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        console.log('Enter key pressed!'); // Debug log
+        handleFormSubmit();
+      }
+    });
+
+    // Enhanced liquid background with mobile optimization
+    (() => {
+      const canvas = document.getElementById('liquid-canvas');
+      const ctx = canvas.getContext('2d');
+      let animationId;
+      
+      function resizeCanvas() {
+        canvas.width = window.innerWidth * window.devicePixelRatio;
+        canvas.height = window.innerHeight * window.devicePixelRatio;
+        canvas.style.width = window.innerWidth + 'px';
+        canvas.style.height = window.innerHeight + 'px';
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      }
+
+      const isMobile = window.innerWidth <= 768;
+      const orbCount = isMobile ? 8 : 15;
+      
+      const orbs = Array.from({ length: orbCount }, () => ({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        radius: Math.random() * (isMobile ? 100 : 150) + (isMobile ? 60 : 80),
+        vx: (Math.random() - 0.5) * (isMobile ? 0.8 : 1.2),
+        vy: (Math.random() - 0.5) * (isMobile ? 0.8 : 1.2),
+        hue: Math.random() * 80 + 100,
+        opacity: Math.random() * (isMobile ? 0.3 : 0.4) + (isMobile ? 0.1 : 0.2),
+        pulseSpeed: Math.random() * 0.02 + 0.01
+      }));
+
+      let time = 0;
+      
+      function animate() {
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        time += 0.016;
+        
+        orbs.forEach((orb, i) => {
+          orb.x += orb.vx;
+          orb.y += orb.vy;
+          
+          if (orb.x < -orb.radius || orb.x > window.innerWidth + orb.radius) orb.vx *= -1;
+          if (orb.y < -orb.radius || orb.y > window.innerHeight + orb.radius) orb.vy *= -1;
+          
+          const pulse = Math.sin(time * orb.pulseSpeed) * 0.3 + 1;
+          const currentRadius = orb.radius * pulse;
+          const currentOpacity = orb.opacity * pulse;
+          
+          const gradient = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, currentRadius);
+          gradient.addColorStop(0, `hsla(${orb.hue}, 90%, 70%, ${currentOpacity})`);
+          gradient.addColorStop(0.4, `hsla(${orb.hue}, 80%, 60%, ${currentOpacity * 0.6})`);
+          gradient.addColorStop(1, 'hsla(0, 0%, 0%, 0)');
+          
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(orb.x, orb.y, currentRadius, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        
+        animationId = requestAnimationFrame(animate);
+      }
+
+      resizeCanvas();
+      animate();
+      window.addEventListener('resize', () => {
+        resizeCanvas();
+        updateBadgeVisibility();
+      });
+    })();
+
+    // Enhanced floating particles (disabled on mobile)
+    (() => {
+      if (window.innerWidth <= 768) return; // Skip particles on mobile
+      
+      const host = document.getElementById('particles');
+      
+      function spawnParticle() {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + 'vw';
+        particle.style.animationDuration = (Math.random() * 10 + 20) + 's';
+        particle.style.animationDelay = (Math.random() * 8) + 's';
+        particle.style.width = particle.style.height = (Math.random() * 4 + 2) + 'px';
+        host.appendChild(particle);
+        setTimeout(() => particle.remove(), 35000);
+      }
+
+      for (let i = 0; i < 40; i++) spawnParticle();
+      setInterval(spawnParticle, 800);
+    })();
+
+    // Input resize with mobile optimization
+    userInput.addEventListener('input', function() {
+      this.style.height = '28px';
+      this.style.height = Math.max(28, Math.min(this.scrollHeight, 120)) + 'px';
+    });
+
+    // State management with mobile menu auto-close
+    function showChatState() {
+      welcomeState.style.display = 'none';
+      chatState.classList.add('active');
+      
+      // Auto-close mobile menu when chat starts
+      if (window.innerWidth <= 1024) {
+        sidebar.classList.remove('open');
+        mobileMenuToggle?.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+      }
+    }
+
+    function showWelcomeState() {
+      welcomeState.style.display = 'flex';
+      chatState.classList.remove('active');
+      chatTitle.textContent = 'How can I help you learn today?';
+    }
+
+    function addMessage(text, who) {
+      showChatState();
+      const div = document.createElement('div');
+      div.className = `msg ${who}`;
+      if (who === 'bot') {
+        div.innerHTML = marked.parse(String(text || ''));
+      } else {
+        div.textContent = String(text || '');
+      }
+      messages.appendChild(div);
+      
+      // Enhanced scroll with mobile optimization
+      requestAnimationFrame(() => {
+        messages.scrollTop = messages.scrollHeight;
+      });
+    }
+
+    function showTyping() {
+      const typing = document.createElement('div');
+      typing.className = 'typing';
+      typing.id = 'typing';
+      typing.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+      messages.appendChild(typing);
+      
+      requestAnimationFrame(() => {
+        messages.scrollTop = messages.scrollHeight;
+      });
+    }
+
+    function hideTyping() {
+      const typing = document.getElementById('typing');
+      if (typing) typing.remove();
+    }
+
+    function updateSuggestions(suggestionsList) {
+      suggestions.innerHTML = '';
+      if (!Array.isArray(suggestionsList) || suggestionsList.length === 0) return;
+      
+      suggestionsList.forEach((suggestion, index) => {
+        const chip = document.createElement('div');
+        chip.className = 'suggestion';
+        chip.textContent = suggestion;
+        chip.style.animationDelay = (index * 0.1) + 's';
+        chip.addEventListener('click', () => {
+          userInput.value = suggestion;
+          userInput.focus();
+          userInput.style.height = '28px';
+          userInput.style.height = Math.max(28, Math.min(userInput.scrollHeight, 120)) + 'px';
+        });
+        suggestions.appendChild(chip);
+      });
+    }
+
+    // API functions
+    async function loadSessions() {
+      try {
+        const response = await fetch('https://sophic-backend-fl4w.onrender.com/sessions');
+        const data = await response.json();
+        sessions = data.sessions;
+        renderSessions();
+      } catch (error) {
+        console.error('Failed to load sessions:', error);
+      }
+    }
+
+    function renderSessions() {
+      sessionsList.innerHTML = '';
+      if (sessions.length === 0) {
+        const emptyState = document.createElement('div');
+        emptyState.className = 'session';
+        emptyState.innerHTML = `
+          <div class="session-title">No conversations yet</div>
+          <div class="session-preview">Start chatting to see your history</div>
+        `;
+        emptyState.style.opacity = '0.6';
+        emptyState.style.cursor = 'default';
+        sessionsList.appendChild(emptyState);
+        return;
+      }
+      
+      sessions.forEach((session, index) => {
+        const sessionDiv = document.createElement('div');
+        sessionDiv.className = `session ${session.id === currentSessionId ? 'active' : ''}`;
+        sessionDiv.style.animationDelay = (index * 0.05) + 's';
+        sessionDiv.onclick = () => loadSession(session.id);
+        sessionDiv.innerHTML = `
+          <div class="session-title">${session.title}</div>
+          <div class="session-preview">${session.preview || `${session.message_count} messages`}</div>
+        `;
+        sessionsList.appendChild(sessionDiv);
+      });
+    }
+
+    async function loadSession(sessionId) {
+      try {
+        currentSessionId = sessionId;
+        const response = await fetch(`https://sophic-backend-fl4w.onrender.com/sessions/${sessionId}`);
+        const data = await response.json();
+        chatTitle.textContent = data.title;
+        messages.innerHTML = '';
+        showChatState();
+        
+        data.messages.forEach((msg, index) => {
+          setTimeout(() => {
+            addMessage(msg.content, msg.role === 'assistant' ? 'bot' : msg.role);
+          }, index * 150);
+        });
+        
+        renderSessions();
+      } catch (error) {
+        console.error('Failed to load session:', error);
+      }
+    }
+
+    function startNewChat() {
+      currentSessionId = null;
+      messages.innerHTML = '';
+      suggestions.innerHTML = '';
+      showWelcomeState();
+      renderSessions();
+      userInput.focus();
+    }
+
+    function askQuestion(question) {
+      userInput.value = question;
+      userInput.style.height = '28px';
+      userInput.style.height = Math.max(28, Math.min(userInput.scrollHeight, 120)) + 'px';
+      handleFormSubmit();
+    }
+
+    // MathJax rendering helper
+    function renderMath() {
+      if (window.MathJax) {
+        MathJax.typesetPromise().catch(function (err) {
+          console.log('MathJax error: ' + err.message);
+        });
+      }
+    }
+    window.renderMath = renderMath;
+
     // Initialize app
     document.addEventListener('DOMContentLoaded', () => {
       loadSessions();
       userInput.focus();
-
       setTimeout(() => {
         document.body.style.opacity = '1';
       }, 100);
     });
-  </script>
-  <!-- Built by section -->
-<div style="position: fixed; bottom: 20px; left: 20px; z-index: 1000;">
-  <div style="
-    padding: 10px 16px; 
-    background: var(--glass-strong); 
-    backdrop-filter: blur(20px); 
-    border: 1px solid var(--border); 
-    border-radius: 12px; 
-    color: var(--text-dim); 
-    font-size: 0.8rem; 
-    font-weight: 500;
-    box-shadow: var(--shadow);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  " 
-  onmouseover="this.style.background='rgba(34, 229, 122, 0.1)'; this.style.borderColor='var(--accent-glow)'; this.style.color='var(--text)'; this.style.transform='translateY(-2px)';" 
-  onmouseout="this.style.background='var(--glass-strong)'; this.style.borderColor='var(--border)'; this.style.color='var(--text-dim)'; this.style.transform='translateY(0)';">
-    Built by <span style="color: var(--accent); font-weight: 600;">Grishiv Sai K</span>
-  </div>
-</div>
-<script>
-function renderMath() {
-    if (window.MathJax) {
-        MathJax.typesetPromise().catch(function (err) {
-            console.log('MathJax error: ' + err.message);
-        });
-    }
-}
 
-// Call this after each AI response
-window.renderMath = renderMath;
-</script>
+    // Handle orientation changes on mobile
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        if (messages.scrollHeight > messages.clientHeight) {
+          messages.scrollTop = messages.scrollHeight;
+        }
+        updateBadgeVisibility();
+      }, 100);
+    });
+
+    // Prevent double-tap zoom on mobile
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (event) {
+      const now = (new Date()).getTime();
+      if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, false);
+  </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
