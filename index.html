@@ -2,17 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
   <title>Sophic — Ask. Learn. Done.</title>
   <meta name="description" content="Sophic is a free AI teacher for NCERT. Cinematic glassmorphism with liquid-glass animation and smooth micro-interactions." />
-
   <!-- THEME TOKENS AND BASE -->
   <style>
     :root{
       --bg-1:#080a0f; --bg-2:#0d1321; --acc-1:#6ea8ff; --acc-2:#9b8cff;
       --txt:#f6f7fb; --txt-dim:#b9bfd1; --glass:rgba(255,255,255,0.06);
       --glass-brd:rgba(255,255,255,0.18); --blur:24px;
-
       /* Fluid spacing scale */
       --space-1: clamp(8px, 1.2vw, 14px);
       --space-2: clamp(12px, 1.8vw, 20px);
@@ -21,7 +19,7 @@
       --section-pad: clamp(40px, 10vw, 120px);
       --radius: 18px;
     }
-    *{box-sizing:border-box}
+    *{box-sizing:border-box; -webkit-tap-highlight-color: transparent}
     html,body{height:100%}
     body{
       margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
@@ -31,9 +29,10 @@
         linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
       color: var(--txt);
       overflow-x:hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
-
-    /* HERO BACKDROP (kept) */
+    /* HERO BACKDROP (optimized for mobile) */
     #gl { position: fixed; inset: 0; width:100%; height:100%; z-index:-2; display:block }
     .fx-overlay{
       pointer-events:none; position:fixed; inset:0; z-index:-1;
@@ -42,32 +41,114 @@
                   radial-gradient(70% 120% at 50% 120%, rgba(0,0,0,.35), transparent 60%);
       filter:saturate(105%);
     }
+    
+    /* MOBILE MENU TOGGLE */
+    .mobile-menu-toggle {
+      display: none;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1001;
+      width: 48px;
+      height: 48px;
+      background: var(--glass);
+      border: 1px solid var(--glass-brd);
+      border-radius: 12px;
+      cursor: pointer;
+      backdrop-filter: blur(16px);
+      transition: all 0.3s ease;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .mobile-menu-toggle span {
+      width: 20px;
+      height: 2px;
+      background: var(--txt);
+      border-radius: 1px;
+      transition: all 0.3s ease;
+    }
+    .mobile-menu-toggle.active span:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+    .mobile-menu-toggle.active span:nth-child(2) {
+      opacity: 0;
+    }
+    .mobile-menu-toggle.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(7px, -6px);
+    }
+    .mobile-menu-toggle:active {
+      transform: scale(0.95);
+    }
+    
+    /* MOBILE OVERLAY */
+    .nav-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(8, 10, 15, 0.95);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(20px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+    }
+    .nav-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .nav-overlay a {
+      color: var(--txt);
+      text-decoration: none;
+      font-size: 2rem;
+      font-weight: 700;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.4s ease;
+    }
+    .nav-overlay.active a {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .nav-overlay a:nth-child(1) { transition-delay: 0.1s; }
+    .nav-overlay a:nth-child(2) { transition-delay: 0.2s; }
+    .nav-overlay a:nth-child(3) { transition-delay: 0.3s; }
+    .nav-overlay a:nth-child(4) { transition-delay: 0.4s; }
 
     /* NAV */
     .nav{
       position:fixed; top:0; left:0; right:0; z-index:10; backdrop-filter: blur(16px);
-      background: linear-gradient(180deg, rgba(10,12,18,.6), rgba(10,12,18,.2));
+      background: linear-gradient(180deg, rgba(10,12,18,.8), rgba(10,12,18,.4));
       border-bottom:1px solid rgba(255,255,255,.08);
     }
     .nav-inner{max-width:1120px; margin:0 auto; padding:14px 20px; display:flex; align-items:center; justify-content:space-between}
     .logo{font-weight:900; letter-spacing:.4px; font-size:1.15rem; background:linear-gradient(90deg, var(--acc-1), var(--acc-2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
-    .nav a{color:var(--txt-dim); text-decoration:none; margin-left:20px; font-weight:600; font-size:.95rem; opacity:.9}
-    .nav a:hover{color:var(--txt)}
+    .nav-links {display: flex; align-items: center; gap: 0;}
+    .nav-links a{color:var(--txt-dim); text-decoration:none; margin-left:20px; font-weight:600; font-size:.95rem; opacity:.9; transition: all 0.3s ease}
+    .nav-links a:hover{color:var(--txt); transform: translateY(-1px)}
 
-    /* HERO (unchanged) */
-    .hero{min-height:100svh; display:grid; place-items:center; padding:120px 16px 64px}
-    .hero-inner{max-width:980px; width:100%; display:grid; gap:28px; text-align:center}
-    .kicker{display:inline-flex; align-items:center; gap:8px; margin:0 auto; padding:6px 12px; border-radius:999px;
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border:1px solid var(--glass-brd); backdrop-filter: blur(10px); color:var(--txt-dim); font-weight:700; letter-spacing:.2px; font-size:.85rem;
-      box-shadow: inset 0 0 0 0.5px rgba(255,255,255,.25), 0 10px 30px rgba(110,168,255,.08);
+    /* HERO (mobile optimized) */
+    .hero{min-height:100svh; display:grid; place-items:center; padding: clamp(100px, 20vh, 140px) 16px clamp(40px, 10vh, 80px)}
+    .hero-inner{max-width:980px; width:100%; display:grid; gap: clamp(20px, 4vw, 32px); text-align:center}
+    .kicker{display:inline-flex; align-items:center; gap:8px; margin:0 auto; padding:8px 16px; border-radius:999px;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border:1px solid var(--glass-brd); backdrop-filter: blur(12px); color:var(--txt-dim); font-weight:700; letter-spacing:.2px; font-size: clamp(0.8rem, 2vw, 0.9rem);
+      box-shadow: inset 0 0 0 0.5px rgba(255,255,255,.25), 0 10px 30px rgba(110,168,255,.1);
     }
     .k-dot{width:8px; height:8px; border-radius:50%; background: radial-gradient(circle at 30% 30%, var(--acc-1), var(--acc-2)); box-shadow:0 0 20px rgba(110,168,255,.7)}
-    .title{font-size: clamp(2rem, 6vw, 4.25rem); font-weight:900; line-height:1.05; letter-spacing:-.02em; margin:0 auto; max-width:900px; text-wrap:balance}
+    .title{font-size: clamp(2.2rem, 8vw, 4.25rem); font-weight:900; line-height:1.05; letter-spacing:-.02em; margin:0 auto; max-width:900px; text-wrap:balance}
     .title .accent{background:linear-gradient(90deg, var(--acc-1), var(--acc-2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
-    .sub{margin:6px auto 0; max-width:760px; color:var(--txt-dim); font-size: clamp(1rem, 2.4vw, 1.25rem)}
+    .sub{margin:6px auto 0; max-width:760px; color:var(--txt-dim); font-size: clamp(1rem, 3.5vw, 1.25rem); line-height: 1.4}
     .glass{
-      margin: 20px auto 0; width:min(820px, 92vw); padding:18px; border-radius:20px; position:relative;
+      margin: clamp(16px, 4vw, 24px) auto 0; width:min(820px, 94vw); padding: clamp(14px, 3vw, 20px); border-radius: clamp(16px, 3vw, 22px); position:relative;
       background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
       border:1px solid var(--glass-brd); backdrop-filter: blur(var(--blur));
       box-shadow: 0 40px 120px rgba(110,168,255,.12), inset 0 1px 0 rgba(255,255,255,.25);
@@ -78,61 +159,132 @@
                   radial-gradient(600px 400px at calc(var(--mx,50%) + 10%) calc(var(--my,50%) + 10%), rgba(155,140,255,.14), transparent 60%);
       mix-blend-mode: screen; filter: blur(10px); opacity:.75; transition:opacity .4s ease
     }
-    .input-row{display:flex; align-items:center; gap:12px}
-    .input{flex:1; font:600 1.05rem/1.2 Inter, system-ui; color:var(--txt);
-      background: transparent; border:none; outline:none; padding:16px 18px; border-radius:14px; backdrop-filter: blur(2px);
+    .input-row{display:flex; align-items:center; gap: clamp(8px, 2vw, 14px); flex-wrap: nowrap}
+    .input{flex:1; font:600 clamp(0.95rem, 3vw, 1.1rem)/1.2 Inter, system-ui; color:var(--txt);
+      background: transparent; border:none; outline:none; padding: clamp(12px, 3vw, 18px) clamp(14px, 3vw, 20px); border-radius: clamp(12px, 2.5vw, 16px); backdrop-filter: blur(2px);
+      min-width: 0; /* Prevent flex overflow */
     }
     .input::placeholder{color:#9aa3b8}
     .send{
-      height:56px; min-width:56px; border-radius:16px; border:1px solid var(--glass-brd);
+      height: clamp(48px, 12vw, 60px); min-width: clamp(48px, 12vw, 60px); border-radius: clamp(12px, 3vw, 18px); border:1px solid var(--glass-brd);
       background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06)); color:var(--txt);
       display:grid; place-items:center; cursor:pointer; transition: transform .18s ease, box-shadow .18s ease;
-      box-shadow: 0 10px 30px rgba(110,168,255,.12);
+      box-shadow: 0 10px 30px rgba(110,168,255,.12); flex-shrink: 0;
     }
     .send:hover{transform: translateY(-2px); box-shadow: 0 16px 40px rgba(110,168,255,.18)}
-    .send svg{display:block}
-    .hint{margin:10px auto 0; max-width:760px; color:#8e98af; font-size:.9rem}
-    .chips{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px}
-    .chip{padding:6px 10px; border-radius:999px; border:1px solid var(--glass-brd); color:#cbd3e6;
-      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04)); font-weight:700; font-size:.8rem; letter-spacing:.2px}
+    .send:active{transform: translateY(0) scale(0.95)}
+    .send svg{display:block; width: clamp(18px, 4vw, 24px); height: clamp(18px, 4vw, 24px)}
+    .hint{margin: clamp(8px, 2vw, 12px) auto 0; max-width:760px; color:#8e98af; font-size: clamp(0.8rem, 2.2vw, 0.95rem); line-height: 1.3}
+    .chips{display:flex; gap: clamp(8px, 2vw, 12px); justify-content:center; flex-wrap:wrap; margin-top: clamp(12px, 3vw, 18px)}
+    .chip{padding: clamp(4px, 1.5vw, 8px) clamp(8px, 2vw, 12px); border-radius:999px; border:1px solid var(--glass-brd); color:#cbd3e6;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04)); font-weight:700; font-size: clamp(0.75rem, 2vw, 0.85rem); letter-spacing:.2px}
 
-    /* ACCESSIBLE HOME BUTTON */
-    .back-home{
-      position: fixed; bottom: 18px; left: 18px; z-index: 30;
-      padding: 10px 14px; font-weight: 800; border-radius: 12px;
-      color:#0b1020; background:#f6f7fb; border:1px solid rgba(255,255,255,.22);
-      box-shadow: 0 10px 30px rgba(0,0,0,.35); text-decoration:none;
-    }
-    .back-home:focus-visible{ outline: 3px solid #6ea8ff; outline-offset: 3px }
-
-    /* CONTENT SECTIONS */
-    .section{ max-width:1120px; margin:0 auto; padding: var(--section-pad) 16px; position:relative }
+    /* CONTENT SECTIONS (mobile optimized) */
+    .section{ max-width:1120px; margin:0 auto; padding: var(--section-pad) clamp(16px, 4vw, 20px); position:relative }
     .section + .section{ margin-top: var(--space-4) }
-
     /* Readable frosted cards */
     .card{
-      background: rgba(10,14,22,.76);
+      background: rgba(10,14,22,.85);
       border: 1px solid rgba(255,255,255,.14);
       border-radius: var(--radius); color:#f6f7fb;
-      padding: clamp(18px, 3.6vw, 28px);
+      padding: clamp(16px, 4vw, 32px);
       backdrop-filter: blur(12px) brightness(1.05) saturate(115%);
       box-shadow: 0 24px 72px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.18);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    @supports not (backdrop-filter: blur(2px)) { .card{ background: rgba(10,14,22,.9) } }
-
-    .section h2{ font-size: clamp(1.8rem, 4.2vw, 2.4rem); margin: 0 0 var(--space-1); letter-spacing:-.01em }
-    .lead{ color: var(--txt-dim); margin: 0 0 var(--space-2); font-size: clamp(1rem,2vw,1.1rem) }
-
+    @supports not (backdrop-filter: blur(2px)) { .card{ background: rgba(10,14,22,.95) } }
+    .section h2{ font-size: clamp(1.6rem, 5vw, 2.4rem); margin: 0 0 var(--space-1); letter-spacing:-.01em; line-height: 1.1 }
+    .lead{ color: var(--txt-dim); margin: 0 0 var(--space-2); font-size: clamp(0.95rem, 2.5vw, 1.1rem); line-height: 1.5 }
     .grid-3{ display:grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
     .grid-2{ display:grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-2); }
-    .pill{ display:inline-block; padding:8px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); font-weight:700; font-size:.85rem; color:#dfe6fb }
+    .pill{ display:inline-block; padding: clamp(6px, 1.5vw, 10px) clamp(10px, 2.5vw, 14px); border-radius:999px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); font-weight:700; font-size: clamp(0.8rem, 2vw, 0.9rem); color:#dfe6fb }
+    .subjects{ display:flex; flex-wrap:wrap; gap: clamp(8px, 2vw, 12px); margin-top: clamp(8px, 2vw, 12px) }
+    .subjects .chip{ padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px); border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.06); font-weight:700; color:#e8edff; font-size: clamp(0.8rem, 2.2vw, 0.9rem) }
 
-    .subjects{ display:flex; flex-wrap:wrap; gap:10px; margin-top:8px }
-    .subjects .chip{ padding:10px 14px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.06); font-weight:700; color:#e8edff }
+    /* CTA BUTTONS */
+    .cta-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+    .btn-primary {
+      padding: 14px 28px;
+      background: linear-gradient(135deg, var(--acc-1), var(--acc-2));
+      color: #0a0f1c;
+      border: none;
+      border-radius: 16px;
+      font-weight: 700;
+      font-size: 1rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(110, 168, 255, 0.3);
+    }
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(110, 168, 255, 0.4);
+    }
+    .btn-primary:active {
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      padding: 14px 28px;
+      background: var(--glass);
+      color: var(--txt);
+      border: 1px solid var(--glass-brd);
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(12px);
+    }
+    .btn-secondary:hover {
+      background: rgba(255,255,255,.1);
+      transform: translateY(-2px);
+    }
 
-    @media (max-width: 900px){
-      .grid-3{ grid-template-columns: 1fr }
-      .grid-2{ grid-template-columns: 1fr }
+    /* MOBILE RESPONSIVE */
+    @media (max-width: 768px){
+      .mobile-menu-toggle { display: flex; }
+      .nav-links { display: none; }
+      .grid-3{ grid-template-columns: 1fr; gap: clamp(12px, 3vw, 18px) }
+      .grid-2{ grid-template-columns: 1fr; gap: clamp(12px, 3vw, 18px) }
+      
+      /* Adjust hero for mobile */
+      .hero { padding: clamp(80px, 15vh, 120px) 12px clamp(30px, 8vh, 60px) }
+      .input-row { flex-direction: row; gap: 10px }
+      .input { font-size: 16px; /* Prevents iOS zoom */ }
+      .hint { font-size: 0.8rem; line-height: 1.4; }
+      .chips { gap: 8px; }
+      .chip { padding: 6px 10px; font-size: 0.75rem; }
+      
+      /* Stack CTA buttons on mobile */
+      .cta-group {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+      .btn-primary, .btn-secondary {
+        width: 100%;
+        max-width: 280px;
+        justify-content: center;
+        padding: 16px 24px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero { padding: 100px 12px 40px }
+      .nav-inner { padding: 12px 16px }
+      .mobile-menu-toggle { top: 16px; right: 16px; width: 44px; height: 44px }
+      .section { padding: clamp(30px, 8vw, 60px) 12px }
     }
 
     /* ================== SCROLL‑DRIVEN ANIMATIONS (CSS View/Scroll Timelines) ================== */
@@ -143,12 +295,10 @@
       from { transform: perspective(900px) rotateX(6deg) rotateY(-6deg) translateY(16px); opacity:.85 }
       to   { transform: perspective(900px) rotateX(0) rotateY(0); opacity:1 }
     }
-
     /* Base reveal utilities tied to view() timeline */
     .reveal{ animation: rise linear both; animation-timeline: view(); animation-range: entry 12% cover 48% }
     .reveal-title{ animation: maskSweep linear both; animation-timeline: view(); animation-range: entry 0% cover 35% }
     .reveal-tilt{ animation: tilt3d ease-out both; animation-timeline: view(); animation-range: entry 12% cover 48% }
-
     /* Parallax via a single keyframe and depth variable */
     @keyframes parallaxY {
       from { transform: translateY(calc(var(--depth, 1) * 22px)) }
@@ -163,11 +313,9 @@
     .layer-bg   { --depth: .25 }
     .layer-mid  { --depth: .5 }
     .layer-fg   { --depth: 1 }
-
     /* Named view timelines per tab to synchronize child animations */
     .tab{ view-timeline: --tab block 10% 10% }
     .tab .consume{ animation-timeline: --tab }
-
     /* Decorative aura layers (simple shapes for depth, non‑intrusive) */
     .aura{
       position:absolute; inset:auto; pointer-events:none; filter: blur(40px) saturate(120%);
@@ -176,18 +324,37 @@
     }
     .aura.a{ width: 360px; height: 360px; top:-60px; left:-60px }
     .aura.b{ width: 300px; height: 300px; bottom:-40px; right:-40px }
+
+    /* Performance optimizations for mobile */
+    @media (max-width: 768px) {
+      .aura { display: none; } /* Remove aura effects on mobile */
+      #gl { filter: blur(1px); } /* Reduce WebGL complexity on mobile */
+      .fx-overlay { filter: none; } /* Remove expensive filters */
+    }
   </style>
 </head>
-
 <body>
   <!-- HERO BACKGROUND (kept) -->
   <canvas id="gl" aria-hidden="true"></canvas>
   <div class="fx-overlay" aria-hidden="true"></div>
-
+  
+  <!-- Mobile Menu Toggle -->
+  <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu">
+    <span></span><span></span><span></span>
+  </button>
+  
+  <!-- Mobile Navigation Overlay -->
+  <div class="nav-overlay" id="navOverlay">
+    <a href="#why" onclick="closeMenu()">Why</a>
+    <a href="#how" onclick="closeMenu()">How</a>
+    <a href="#subjects" onclick="closeMenu()">Subjects</a>
+    <a href="#try" onclick="closeMenu()">Try</a>
+  </div>
+  
   <header class="nav" role="navigation" aria-label="Primary">
     <div class="nav-inner">
       <div class="logo" aria-label="Sophic">Sophic</div>
-      <nav>
+      <nav class="nav-links">
         <a href="#why">Why</a>
         <a href="#how">How</a>
         <a href="#subjects">Subjects</a>
@@ -195,10 +362,7 @@
       </nav>
     </div>
   </header>
-
-  <!-- Back-to-front-page -->
-  <a class="back-home" href="/" aria-label="Back to front page">← Home</a>
-
+  
   <!-- HERO (unchanged content) -->
   <main class="hero" id="top">
     <div class="hero-inner">
@@ -220,24 +384,21 @@
           <div class="chip">24/7</div>
           <div class="chip">Free during beta</div>
         </div>
-        <div class="hint" id="hint">Press Enter ↵ to ask • Try “Photosynthesis Class 10”</div>
+        <div class="hint" id="hint">Press Enter ↵ to ask • Try "Photosynthesis Class 10"</div>
       </div>
     </div>
   </main>
-
+  
   <!-- ================= TABS WITH VIEW‑TIMELINE ANIMATIONS AND PARALLAX ================= -->
-
   <!-- WHY TAB -->
   <section class="section tab" id="why">
     <!-- subtle aura layers with parallax -->
     <div class="aura a layer-bg parallax"></div>
     <div class="aura b layer-mid parallax"></div>
-
     <div class="card reveal-tilt consume">
       <span class="pill">Why Sophic</span>
       <h2 class="reveal-title consume">Clarity, speed, no fluff.</h2>
       <p class="lead reveal consume">Focused NCERT help with step‑by‑step logic and worked examples — without 40‑minute detours. </p>
-
       <div class="grid-3">
         <div class="card reveal-tilt consume">
           <h3 style="margin:0 0 var(--space-1)">Actually explains</h3>
@@ -254,7 +415,7 @@
       </div>
     </div>
   </section>
-
+  
   <!-- HOW TAB -->
   <section class="section tab" id="how">
     <div class="card reveal-tilt consume">
@@ -276,7 +437,7 @@
       </div>
     </div>
   </section>
-
+  
   <!-- SUBJECTS TAB -->
   <section class="section tab" id="subjects">
     <div class="card reveal-tilt consume">
@@ -295,23 +456,76 @@
       </div>
     </div>
   </section>
-
+  
   <!-- TRY -->
   <section class="section tab" id="try">
     <div class="card reveal-tilt consume" style="text-align:center">
       <h2 class="reveal-title consume">Try it now</h2>
-      <p class="lead reveal consume">Instant demo — no sign‑up. Type a question in the box above and hit the paper plane. </p>
+      <p class="lead reveal consume">Ready to experience the difference? Start chatting with your AI tutor now.</p>
+      <div class="cta-group">
+        <a href="chat.html" class="btn-primary">
+          Start Chatting
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 17L17 7"></path>
+            <path d="M7 7h10v10"></path>
+          </svg>
+        </a>
+        <button class="btn-secondary" onclick="scrollToTop()">
+          Try Demo Above
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 15l-6-6-6 6"></path>
+          </svg>
+        </button>
+      </div>
     </div>
   </section>
-
+  
   <footer class="section" style="text-align:center; color:#95a0ba">© 2025 Sophic — Student‑first.</footer>
-
+  
   <!-- =================== SCRIPTS =================== -->
   <script>
-    /* ====== Liquid Glass WebGL (hero) — original shader kept ====== */
+    /* ====== Mobile Menu Functionality ====== */
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const navOverlay = document.getElementById('navOverlay');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      mobileMenuToggle.classList.toggle('active');
+      navOverlay.classList.toggle('active');
+      document.body.style.overflow = navOverlay.classList.contains('active') ? 'hidden' : '';
+    });
+    
+    function closeMenu() {
+      mobileMenuToggle.classList.remove('active');
+      navOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    
+    function scrollToTop() {
+      document.getElementById('top').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Close menu when clicking on overlay
+    navOverlay.addEventListener('click', (e) => {
+      if (e.target === navOverlay) {
+        closeMenu();
+      }
+    });
+    
+    // Handle smooth scrolling for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    /* ====== Liquid Glass WebGL (hero) — mobile optimized ====== */
     const canvas = document.getElementById('gl');
-    const gl = canvas.getContext('webgl', {antialias:true, preserveDrawingBuffer:true});
-    let W=0,H=0, DPR=Math.min(2, window.devicePixelRatio||1);
+    const gl = canvas.getContext('webgl', {antialias:false, preserveDrawingBuffer:false}); // Reduced quality for mobile
+    let W=0,H=0, DPR=Math.min(window.innerWidth <= 768 ? 1 : 2, window.devicePixelRatio||1); // Lower DPR on mobile
     const vert = `attribute vec2 p; void main(){ gl_Position = vec4(p,0.0,1.0); }`;
     const frag = `precision highp float; uniform vec2 r; uniform float t; uniform vec2 m;
 float hash(vec2 p){return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453123);}
@@ -319,7 +533,7 @@ float noi(vec2 p){ vec2 i=floor(p); vec2 f=fract(p);
 float a=hash(i); float b=hash(i+vec2(1.,0.)); float c=hash(i+vec2(0.,1.)); float d=hash(i+vec2(1.,1.));
 vec2 u = f*f*(3.-2.*f); return mix(a,b,u.x)+ (c-a)*u.y*(1.-u.x) + (d-b)*u.x*u.y; }
 float smin(float a, float b, float k){ float h=clamp(.5+.5*(b-a)/k,0.,1.); return mix(b,a,h)-k*h*(1.-h); }
-float field(vec2 uv){ float d=1.; for(int i=0;i<6;i++){ float fi=float(i);
+float field(vec2 uv){ float d=1.; for(int i=0;i<${window.innerWidth <= 768 ? 4 : 6};i++){ float fi=float(i);
 vec2 c = 0.35*vec2(sin(t*0.4+fi*1.7), cos(t*0.33+fi*1.2)); float rad = 0.22 + 0.06*sin(t*0.7+fi);
 float s = length(uv-c) - rad; d = smin(d, s, 0.18); } return d; }
 vec3 bg(vec2 uv){ uv = uv*0.5+0.5; vec3 c1 = vec3(0.03,0.05,0.10); vec3 c2 = vec3(0.06,0.08,0.16);
@@ -334,8 +548,10 @@ vec3 refr = vec3(colR.r, colG.g, colB.b); float glass = smoothstep(0.04, -0.02, 
 vec3 tint = mix(vec3(1.), vec3(0.94,0.96,1.0), 0.45); vec3 col = mix(bg(uv), refr*tint + 0.05*edge, glass);
 float sweep = 0.0; sweep += 0.7*exp(-20.0*pow(abs(dot(n, normalize(vec2(0.7,0.6)))), 1.5)); sweep *= glass; col += sweep*vec3(0.8,0.9,1.0);
 float vig = smoothstep(1.2, 0.3, length(uv)); col *= vig; gl_FragColor = vec4(col, 1.0); }`;
+    
     function compile(type, src){ const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
       if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){ throw new Error(gl.getShaderInfoLog(s)); } return s; }
+    
     if(gl){
       const prog = gl.createProgram();
       gl.attachShader(prog, compile(gl.VERTEX_SHADER, vert));
@@ -351,15 +567,33 @@ float vig = smoothstep(1.2, 0.3, length(uv)); col *= vig; gl_FragColor = vec4(co
       addEventListener('resize', resize, {passive:true}); resize();
       let start = performance.now(), mx=innerWidth*DPR/2, my=innerHeight*DPR/2;
       const glass = document.getElementById('glass');
-      addEventListener('pointermove', e=>{ mx=e.clientX*DPR; my=e.clientY*DPR; glass?.style.setProperty('--mx', e.clientX+'px'); glass?.style.setProperty('--my', e.clientY+'px'); }, {passive:true});
-      (function loop(){
-        const t = (performance.now()-start)/1000;
-        gl.uniform2f(uR, canvas.width, canvas.height); gl.uniform1f(uT, t); gl.uniform2f(uM, mx, my);
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
+      
+      // Optimize mouse tracking for mobile
+      let mouseMoveTimeout;
+      addEventListener('pointermove', e=>{ 
+        clearTimeout(mouseMoveTimeout);
+        mx=e.clientX*DPR; my=e.clientY*DPR; 
+        glass?.style.setProperty('--mx', e.clientX+'px'); 
+        glass?.style.setProperty('--my', e.clientY+'px'); 
+      }, {passive:true});
+      
+      // Reduce animation frame rate on mobile
+      const isMobile = window.innerWidth <= 768;
+      const targetFPS = isMobile ? 30 : 60;
+      const frameInterval = 1000 / targetFPS;
+      let lastTime = 0;
+      
+      (function loop(currentTime){
+        if (currentTime - lastTime >= frameInterval) {
+          const t = (performance.now()-start)/1000;
+          gl.uniform2f(uR, canvas.width, canvas.height); gl.uniform1f(uT, t); gl.uniform2f(uM, mx, my);
+          gl.drawArrays(gl.TRIANGLES, 0, 6);
+          lastTime = currentTime;
+        }
         requestAnimationFrame(loop);
       })();
     }
-
+    
     /* HERO INPUT */
     const q = document.getElementById('q');
     const send = document.getElementById('send');
@@ -371,6 +605,7 @@ float vig = smoothstep(1.2, 0.3, length(uv)); col *= vig; gl_FragColor = vec4(co
       'Chemical equations — balance this: Fe + O2 → Fe2O3'
     ];
     let si=0, ci=0, typing=true;
+    
     function typeLoop(){
       const s = suggestions[si];
       if(typing){ ci++; q.setAttribute('placeholder', s.slice(0,ci));
@@ -382,6 +617,7 @@ float vig = smoothstep(1.2, 0.3, length(uv)); col *= vig; gl_FragColor = vec4(co
       }
     }
     typeLoop();
+    
     function rocket(btn){
       btn.animate([
         { transform:'translateY(0) scale(1)', filter:'drop-shadow(0 10px 20px rgba(110,168,255,.3))' },
@@ -389,11 +625,17 @@ float vig = smoothstep(1.2, 0.3, length(uv)); col *= vig; gl_FragColor = vec4(co
         { transform:'translateY(0) scale(1)' }
       ], { duration:320, easing:'cubic-bezier(.2,.8,.2,1)' });
     }
-    function go(){ const v=q.value.trim(); if(!v) return; rocket(send); location.href='sophic-chat.html?q='+encodeURIComponent(v);
- }
+    
+    function go(){ 
+      const v=q.value.trim(); 
+      if(!v) return; 
+      rocket(send); 
+      location.href='chat.html?q='+encodeURIComponent(v);
+    }
+    
     send.addEventListener('click', go);
     q.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); go(); } });
-
+    
     /* View‑Timeline fallback: if unsupported, mimic with IntersectionObserver */
     const supportsVT = CSS.supports('animation-timeline: view()');
     if(!supportsVT){
@@ -411,12 +653,23 @@ float vig = smoothstep(1.2, 0.3, length(uv)); col *= vig; gl_FragColor = vec4(co
       style.textContent = `.in{ opacity:1!important; transform:none!important; clip-path: inset(0 0 0 0)!important; transition:.7s ease }`;
       document.head.appendChild(style);
     }
+    
+    // Prevent double-tap zoom on mobile
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (event) {
+      const now = (new Date()).getTime();
+      if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, false);
   </script>
+
 <!-- Built by section -->
-<div style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+<div style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: none;" id="builtByBadge">
   <div style="
     padding: 12px 20px; 
-    background: rgba(20, 25, 40, 0.9); 
+    background: rgba(20, 25, 40, 0.95); 
     backdrop-filter: blur(20px); 
     border: 1px solid rgba(255, 255, 255, 0.1); 
     border-radius: 16px; 
@@ -425,12 +678,8 @@ float vig = smoothstep(1.2, 0.3, length(uv)); col *= vig; gl_FragColor = vec4(co
     font-weight: 500;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     transition: all 0.3s ease;
+    white-space: nowrap;
   " 
   onmouseover="this.style.background='rgba(34, 229, 122, 0.1)'; this.style.borderColor='rgba(34, 229, 122, 0.3)'; this.style.color='#f0f4ff';" 
-  onmouseout="this.style.background='rgba(20, 25, 40, 0.9)'; this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.color='#9ca8c4';">
-    Built by <span style="color: #22e57a; font-weight: 600;">Grishiv Sai K</span>
-  </div>
-</div>
-</body>
-</html>
-
+  onmouseout="this.style.background='rgba(20, 25, 40, 0.95)'; this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.color='#9ca8c4';">
+    Built by <span style="color: #22e57a; font-weight: 600;">
