@@ -1175,10 +1175,10 @@
 
       <!-- FIXED Input - Always visible -->
       <div class="input">
-        <div class="input-bar" id="inputBar">
+        <form class="input-bar" id="chatForm">
           <textarea id="userInput" placeholder="Ask me anything about your studies..." rows="1"></textarea>
           <button type="button" id="sendButton">↗</button>
-        </div>
+        </form>
       </div>
     </div>
   </div>
@@ -1194,7 +1194,7 @@
     const messages = document.getElementById('messages');
     const userInput = document.getElementById('userInput');
     const sendButton = document.getElementById('sendButton');
-    const inputBar = document.getElementById('inputBar');
+    const chatForm = document.getElementById('chatForm');
     const sessionsList = document.getElementById('sessionsList');
     const chatTitle = document.getElementById('chatTitle');
     const suggestions = document.getElementById('suggestions');
@@ -1228,92 +1228,11 @@
       sidebarOverlay.classList.remove('active');
     });
 
-    // BULLETPROOF message handling function
-    async function handleFormSubmit() {
+    // Send button click handler - FIXED
+    sendButton.addEventListener('click', () => {
       const message = userInput.value.trim();
       if (!message || sendButton.disabled) return;
-
-      console.log('Sending message:', message); // Debug log
-
-      addMessage(message, 'user');
-      
-      // Reset input
-      userInput.value = '';
-      userInput.style.height = '28px';
-      sendButton.disabled = true;
-      showTyping();
-
-      try {
-        const response = await fetch('https://sophic-backend-fl4w.onrender.com/ask', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            question: message,
-            session_id: currentSessionId
-          })
-        });
-        
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        
-        const data = await response.json();
-        hideTyping();
-        currentSessionId = data.session_id;
-        
-        const botResponse = data.answer || 'I apologize, but I couldn\'t generate a proper response. Please try asking again.';
-        
-        setTimeout(() => {
-          addMessage(botResponse, 'bot');
-          
-          // Render math
-          setTimeout(() => {
-            if (window.MathJax && window.MathJax.typesetPromise) {
-              MathJax.typesetPromise();
-            }
-          }, 100);
-          
-          if (data.suggestions && data.suggestions.length > 0) {
-            setTimeout(() => {
-              updateSuggestions(data.suggestions);
-            }, 300);
-          }
-        }, 500);
-
-        if (chatTitle.textContent === 'How can I help you learn today?') {
-          const newTitle = data.meta?.session_title || (message.length > 30 ? message.substring(0, 30) + '...' : message);
-          chatTitle.textContent = newTitle;
-        }
-
-        setTimeout(() => {
-          loadSessions();
-        }, 1000);
-        
-      } catch (error) {
-        hideTyping();
-        setTimeout(() => {
-          addMessage('I apologize, but I encountered a technical issue. Please check that the API server is running and try again.', 'bot');
-        }, 300);
-        console.error('Error:', error);
-      } finally {
-        sendButton.disabled = false;
-        userInput.focus();
-      }
-    }
-
-    // DIRECT send button click handler - BULLETPROOF
-    sendButton.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      console.log('Send button clicked!'); // Debug log
-      handleFormSubmit();
-    });
-
-    // Enter key handler
-    userInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        console.log('Enter key pressed!'); // Debug log
-        handleFormSubmit();
-      }
+      chatForm.dispatchEvent(new Event('submit'));
     });
 
     // Enhanced liquid background with mobile optimization
@@ -1408,6 +1327,16 @@
     userInput.addEventListener('input', function() {
       this.style.height = '28px';
       this.style.height = Math.max(28, Math.min(this.scrollHeight, 120)) + 'px';
+    });
+
+    // Enter to send
+    userInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (!sendButton.disabled && userInput.value.trim()) {
+          chatForm.dispatchEvent(new Event('submit'));
+        }
+      }
     });
 
     // State management with mobile menu auto-close
@@ -1556,8 +1485,78 @@
       userInput.value = question;
       userInput.style.height = '28px';
       userInput.style.height = Math.max(28, Math.min(userInput.scrollHeight, 120)) + 'px';
-      handleFormSubmit();
+      chatForm.dispatchEvent(new Event('submit'));
     }
+
+    // Enhanced form submission
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = userInput.value.trim();
+      if (!message || sendButton.disabled) return;
+
+      addMessage(message, 'user');
+      
+      // Reset input
+      userInput.value = '';
+      userInput.style.height = '28px';
+      sendButton.disabled = true;
+      showTyping();
+
+      try {
+        const response = await fetch('https://sophic-backend-fl4w.onrender.com/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question: message,
+            session_id: currentSessionId
+          })
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        hideTyping();
+        currentSessionId = data.session_id;
+        
+        const botResponse = data.answer || 'I apologize, but I couldn\'t generate a proper response. Please try asking again.';
+        
+        setTimeout(() => {
+          addMessage(botResponse, 'bot');
+          
+          // Render math
+          setTimeout(() => {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+              MathJax.typesetPromise();
+            }
+          }, 100);
+          
+          if (data.suggestions && data.suggestions.length > 0) {
+            setTimeout(() => {
+              updateSuggestions(data.suggestions);
+            }, 300);
+          }
+        }, 500);
+
+        if (chatTitle.textContent === 'How can I help you learn today?') {
+          const newTitle = data.meta?.session_title || (message.length > 30 ? message.substring(0, 30) + '...' : message);
+          chatTitle.textContent = newTitle;
+        }
+
+        setTimeout(() => {
+          loadSessions();
+        }, 1000);
+        
+      } catch (error) {
+        hideTyping();
+        setTimeout(() => {
+          addMessage('I apologize, but I encountered a technical issue. Please check that the API server is running and try again.', 'bot');
+        }, 300);
+        console.error('Error:', error);
+      } finally {
+        sendButton.disabled = false;
+        userInput.focus();
+      }
+    });
 
     // MathJax rendering helper
     function renderMath() {
@@ -1569,14 +1568,41 @@
     }
     window.renderMath = renderMath;
 
-    // Initialize app
-    document.addEventListener('DOMContentLoaded', () => {
-      loadSessions();
-      userInput.focus();
-      setTimeout(() => {
-        document.body.style.opacity = '1';
-      }, 100);
-    });
+// Read query parameter from homepage
+function loadQueryFromURL() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const query = urlParams.get('q');
+  
+  if (query) {
+    console.log('Query from homepage:', query);
+    
+    // Set the input value
+    userInput.value = query;
+    
+    // Resize the textarea
+    userInput.style.height = '28px';
+    userInput.style.height = Math.max(28, Math.min(userInput.scrollHeight, 120)) + 'px';
+    
+    // Auto-submit after a short delay
+    setTimeout(() => {
+      handleFormSubmit();
+    }, 800);
+  }
+}
+
+// Initialize app
+document.addEventListener('DOMContentLoaded', () => {
+  loadSessions();
+  userInput.focus();
+  
+  // ADD THIS LINE - Load query from homepage
+  loadQueryFromURL();
+  
+  setTimeout(() => {
+    document.body.style.opacity = '1';
+  }, 100);
+});
+
 
     // Handle orientation changes on mobile
     window.addEventListener('orientationchange', () => {
