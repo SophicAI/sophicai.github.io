@@ -11,4 +11,4 @@ Sophic is a free AI-powered learning platform for **Grades 6–10**, built on th
 - Free and accessible for all students.
 
 ## License
-GRISHIV © 2025 Sophic
+MIT © 2025 Sophic
