@@ -2560,18 +2560,34 @@ float vig = smoothstep(1.25, 0.22, length(uv)); col *= vig; gl_FragColor = vec4(
       }
     }
 
-    function completeOnboarding() {
-      userProfile = {
-        grade: selectedOptions.step_0,
-        subjects: selectedOptions.step_1,
-        learningStyle: selectedOptions.step_2,
-        createdAt: Date.now()
-      };
-      
-      localStorage.setItem('sophic_profile', JSON.stringify(userProfile));
-      console.log('🎯 User Profile Created:', userProfile);
-      showPersonalizedWelcome();
-    }
+function completeOnboarding() {
+  userProfile = {
+    grade: selectedOptions.step_0,
+    subjects: selectedOptions.step_1,
+    learningStyle: selectedOptions.step_2,
+    createdAt: Date.now()
+  };
+  
+  localStorage.setItem('sophic_profile', JSON.stringify(userProfile));
+  console.log('🎯 User Profile Created:', userProfile);
+  
+  // ✅ CHECK FOR PENDING QUERY FROM HOMEPAGE:
+  const pendingQuery = sessionStorage.getItem('pending_query');
+  if (pendingQuery) {
+    sessionStorage.removeItem('pending_query');
+    userInput.value = pendingQuery;
+    userInput.style.height = '22px';
+    userInput.style.height = Math.max(22, Math.min(userInput.scrollHeight, 90)) + 'px';
+    
+    showChatState();
+    setTimeout(() => {
+      handleFormSubmit();
+    }, 1000);
+  } else {
+    showPersonalizedWelcome();
+  }
+}
+
 
     /* ====== ENHANCED PERSONALIZED SYSTEM ====== */
     function showPersonalizedWelcome() {
@@ -2946,19 +2962,8 @@ float vig = smoothstep(1.25, 0.22, length(uv)); col *= vig; gl_FragColor = vec4(
         userInput.style.height = '22px';
         userInput.style.height = Math.max(22, Math.min(userInput.scrollHeight, 90)) + 'px';
         
-        if (!userProfile) {
-          userProfile = {
-            grade: '10',
-            subjects: ['math', 'physics'],
-            learningStyle: 'stepbystep'
-          };
-          localStorage.setItem('sophic_profile', JSON.stringify(userProfile));
-        }
-        
-        showChatState();
-        setTimeout(() => {
-          handleFormSubmit();
-        }, 1000);
+    sessionStorage.setItem('pending_query', query);
+
       }
     }
 
@@ -3302,4 +3307,3 @@ float vig = smoothstep(1.25, 0.22, length(uv)); col *= vig; gl_FragColor = vec4(
   </script>
 </body>
 </html>
-
